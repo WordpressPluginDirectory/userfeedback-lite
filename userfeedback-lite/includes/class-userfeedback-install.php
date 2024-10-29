@@ -44,7 +44,6 @@ class UserFeedback_Install {
 	 * @return void
 	 */
 	public function init() {
-		;
 		// Get a copy of the current UF settings.
 		$this->new_settings = get_option( userfeedback_get_option_name() );
 
@@ -65,6 +64,8 @@ class UserFeedback_Install {
 		} else { // If existing install
 			// Future upgrades...
 
+			// Maybe upgrade current tables using dbDelta
+			$this->create_userfeedback_tables();
 			// -------------------------
 			// Do not use. See userfeedback_after_install_routine comment below.
 			do_action( 'userfeedback_after_existing_upgrade_routine', $version );

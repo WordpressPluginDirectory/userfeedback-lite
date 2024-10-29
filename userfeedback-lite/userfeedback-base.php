@@ -20,7 +20,7 @@ if (!class_exists('UserFeedback_Base')) {
 		 * @access public
 		 * @var string $version Plugin version
 		 */
-		public $version = '1.1.1';
+		public $version = '1.2.0';
 
 		/**
 		 * Plugin file.
@@ -168,7 +168,7 @@ if (!class_exists('UserFeedback_Base')) {
 
 				// This does the version to version background upgrade routines and initial install
 				$uf_version = get_option('userfeedback_current_version', '0.0.0');
-				if (version_compare($uf_version, '1.0.0', '<')) {
+				if (version_compare($uf_version, '1.2.0', '<')) {
 					add_action('wp_loaded', array(self::$instance, 'install_and_upgrade'));
 				}
 

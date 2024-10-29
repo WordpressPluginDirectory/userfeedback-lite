@@ -124,51 +124,93 @@ class UserFeedback_Results {
 	 * @param $survey_id
 	 * @return mixed|null
 	 */
-	public static function get_survey_results_data( $survey_id ) {
-
+	public static function get_survey_results_data( $survey_id, $from_date = '', $to_date = '' ) {
 		$start_date_7_days  = ( new DateTime() )->modify( '-7 days' );
 		$start_date_30_days = ( new DateTime() )->modify( '-30 days' );
 		$end_date           = new DateTime();
 
-		$survey = UserFeedback_Survey::where(
+		$survey_query = UserFeedback_Survey::where(
 			array(
-				'id' => $survey_id,
+				'id' => $survey_id
 			)
-		)->select( array( 'title', 'status', 'impressions', 'questions' ) )
-			->with_count_where(
-				'responses',
-				array(
+		)->select( array( 'title', 'status', 'impressions', 'questions', 'type' ) );
+		
+		$survey = $survey_query->single();
+		
+		if ( 'nps' === $survey->type ) {
+			$where_conditions = array( 'survey_id' => $survey_id );
+
+			// By default, nps will return last 30 days results including today
+			if ( empty( $from_date ) && empty( $to_date ) ) {
+				$today = new DateTime();
+				$todayFormatted = $today->format('Y-m-d');
+	
+				$dateBefore30Days = new DateTime();
+				$dateBefore30Days->modify('-30 days');
+				$dateBefore30DaysFormatted = $dateBefore30Days->format('Y-m-d');
+
+				$from_date = $dateBefore30DaysFormatted;
+				$to_date = $todayFormatted;
+			}
+			
+			if ( ! empty( $from_date ) ) {
+				$where_conditions[] = array(
+					'DATE(submitted_at)',
+					'>=',
+					$from_date,
+				);
+			}
+
+			if ( ! empty( $to_date ) ) {
+				$where_conditions[] = array(
+					'DATE(submitted_at)',
+					'<=',
+					$to_date,
+				);
+			}
+			
+			$responses = UserFeedback_Response::where( $where_conditions )
+				->select( array( 'id', 'survey_id', 'answers', 'submitted_at', 'status' ) )
+				->get();
+
+			$survey->nps_overview = self::get_nps_survey_overview( $responses );
+			$survey->responses = $responses;
+		} else {
+			$survey = $survey_query->with_count_where(
+					'responses',
 					array(
-						'submitted_at',
-						'>=',
-						$start_date_7_days->format( 'Y-m-d' ),
+						array(
+							'submitted_at',
+							'>=',
+							$start_date_7_days->format( 'Y-m-d' ),
+						),
+						array(
+							'submitted_at',
+							'<=',
+							$end_date->format( 'Y-m-d' ),
+						),
 					),
+					'responses_count_7_days'
+				)
+				->with_count_where(
+					'responses',
 					array(
-						'submitted_at',
-						'<=',
-						$end_date->format( 'Y-m-d' ),
+						array(
+							'submitted_at',
+							'>=',
+							$start_date_30_days->format( 'Y-m-d' ),
+						),
+						array(
+							'submitted_at',
+							'<=',
+							$end_date->format( 'Y-m-d' ),
+						),
 					),
-				),
-				'responses_count_7_days'
-			)
-			->with_count_where(
-				'responses',
-				array(
-					array(
-						'submitted_at',
-						'>=',
-						$start_date_30_days->format( 'Y-m-d' ),
-					),
-					array(
-						'submitted_at',
-						'<=',
-						$end_date->format( 'Y-m-d' ),
-					),
-				),
-				'responses_count_30_days'
-			)
-			->with( array( 'responses' ) )
-			->single();
+					'responses_count_30_days'
+				)
+				->with( array( 'responses' ) )
+				->single();
+		}
 
 		if ( $survey === null ) {
 			return null;
@@ -279,6 +321,52 @@ class UserFeedback_Results {
 		$survey->question_stats = $question_stats;
 
 		return $survey;
+	}
+
+	private static function get_nps_survey_overview( $responses = array() )
+	{
+		$totalCount = count($responses);
+
+		if ($totalCount > 0) {
+			$detractors = 0;
+			$passives = 0;
+			$promoters = 0;
+	
+			foreach ($responses as $item) {
+				if (!isset($item->answers[0]->value)) {
+					continue;
+				}
+	
+				$value = $item->answers[0]->value;
+	
+				if ($value >= 1 && $value <= 6) {
+					$detractors++;
+				} elseif ($value >= 7 && $value <= 8) {
+					$passives++;
+				} elseif ($value >= 9 && $value <= 10) {
+					$promoters++;
+				}
+			}
+	
+			// Calculate percentages and round to 2 decimal places
+			$detractorsPercentage = floor(($detractors / $totalCount) * 100);
+			$passivesPercentage = floor(($passives / $totalCount) * 100);
+			$promotersPercentage = floor(($promoters / $totalCount) * 100);
+	
+			return array(
+				'detractor' => $detractorsPercentage, 
+				'passive' => $passivesPercentage, 
+				'promoter' => $promotersPercentage,
+				'nps' => floor($promotersPercentage - $detractorsPercentage),
+			);
+		}
+
+		return array(
+			'detractor' => 0, 
+			'passive' => 0, 
+			'promoter' => 0,
+			'nps' => 'N/A',
+		);
 	}
 
 	/**
@@ -393,7 +481,7 @@ class UserFeedback_Results {
 			)
 		);
 
-		$surveys_query->select( array( 'title', 'status', 'created_at' ) )
+		$surveys_query->select( array( 'title', 'type', 'status', 'created_at' ) )
 			->with_count( array( 'responses' ) )
 			->with_count_where( 'responses', $where_config, 'range_responses_count' )
 			->sort( 'id', 'desc' );
@@ -415,8 +503,10 @@ class UserFeedback_Results {
 	 */
 	public function get_survey_results( WP_REST_Request $request ) {
 		$survey_id = $request['id'];
+		$from_date = $request['from'];
+		$to_date = $request['to'];
 
-		$survey = self::get_survey_results_data( $survey_id );
+		$survey = self::get_survey_results_data( $survey_id, $from_date, $to_date );
 
 		if ( $survey === null ) {
 			return new WP_REST_Response( null, 404 );

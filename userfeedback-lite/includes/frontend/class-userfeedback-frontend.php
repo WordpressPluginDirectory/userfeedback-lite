@@ -392,7 +392,7 @@ class UserFeedback_Frontend
 					current_time('mysql', true),
 				),
 			)
-		)->select(array('title', 'questions', 'settings'))
+		)->select(array('title', 'questions', 'settings', 'type'))
 			->sort('id', 'desc')
 			->get();
 

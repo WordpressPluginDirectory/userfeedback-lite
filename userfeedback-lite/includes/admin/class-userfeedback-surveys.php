@@ -330,6 +330,18 @@ class UserFeedback_Surveys {
 				empty( $params['title'] ) ?
 					sprintf( __( 'Survey #%d', 'userfeedback' ), $number_of_surveys + 1 ) : $params['title'];
 
+			/**
+			 * Add type for nps surveys
+			 * Surveys created from the template `nps` is marked as NPS survey
+			 */
+			if (
+				! isset( $survey_id ) &&
+				isset( $params[ 'template' ] ) &&
+				'nps' === $params[ 'template' ]
+			) {
+				$params['type'] = 'nps';
+			}
+
 			$new_id = UserFeedback_Survey::create(
 				array_merge(
 					$params,

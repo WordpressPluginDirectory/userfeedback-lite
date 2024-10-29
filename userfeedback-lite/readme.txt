@@ -4,7 +4,7 @@ Donate link: http://www.wpbeginner.com/wpbeginner-needs-your-help/
 Tags: analytics,feedback,surveys,user feedback, website feedback,insights
 Requires at least: 5.9.0
 Tested Up To: 6.6.1
-Stable tag: 1.1.1
+Stable tag: 1.2.0
 Requires PHP: 5.6
 License: GPL v3
 
@@ -114,6 +114,10 @@ For documentation, tutorials, FAQ and videos check out: [UserFeedback Documentat
 4. Want more features? <a href=href="https://www.userFeedback.com/?utm_source=wprepo&utm_medium=link&utm_campaign=lite" rel="friend" title="UserFeedback">Purchase UserFeedback Pro</a>!
 
 == Changelog ==
+= 1.2.0: October 28, 2024 =
+- New: NPS Survey and Reports! Now you can collect NPS survey results.
+- Fixed: Minor updates and bug fixes
+
 = 1.1.1: July 29, 2024 =
 - Fix: Bug fixes
 
