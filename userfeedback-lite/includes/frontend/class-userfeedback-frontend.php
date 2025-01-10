@@ -361,6 +361,22 @@ class UserFeedback_Frontend
 			$surveys
 		);
 
+		// For icon-choice question type, we need to extract the svg markup and send to frontend to render
+		foreach($surveys as &$survey) {
+			foreach($survey->questions as $question) {
+				if ($question->type === 'icon-choice') {
+					foreach($question->config->options as $option) {
+						$svg_file_path = plugin_dir_path(USERFEEDBACK_PLUGIN_FILE) . 'assets/vue/icon-choices/svgs/' . $option->icon->style . '/' . $option->icon->icon . '.svg';
+
+						if (file_exists($svg_file_path)) {
+							$svg_content = file_get_contents($svg_file_path);
+							$option->icon = $svg_content;
+						}
+					}
+				}
+			}
+		}
+
 		/*
 		 * If there are no Surveys available, we don't enqueue the scripts
 		 */
@@ -369,6 +385,264 @@ class UserFeedback_Frontend
 			$this->enqueue_base_frontend_scripts();
 			$this->enqueue_frontend_scripts_for_surveys($surveys);
 		}
+	}
+
+	/**
+	 * Process individual rules with logic handling like the JavaScript function.
+	 * 
+	 * @param array $rules Array of rules to process (AND or OR rules).
+	 * @return array Array of booleans for each rule.
+	 */
+	private function process_rules($rules) {
+		$result = [];
+
+		global $post, $current_user;
+		
+		$user_roles = $current_user->roles;
+
+		foreach ($rules as $rule) {
+			$logic = $rule->logic;
+
+			if (empty($rule->data)) {
+				continue;
+			}
+
+			$value = isset($rule->data->id) ? $rule->data->id : $rule->data;
+
+			// Remove trailing slashes from input value
+			if (is_string($value)) {
+				$value = preg_replace('/\/+$/', '', $value);
+			}
+
+			switch ($logic) {
+				case 'user_logged_in': {
+					$user_logged_in = is_user_logged_in();
+
+					if ($value === 'user_logged_in') {
+						$result[] = $user_logged_in;
+					} elseif ($value === 'user_logged_out') {
+						$result[] = !$user_logged_in;
+					}
+					break;
+				}
+			
+				case 'page_type': {
+					$page_type = userfeedback_get_type_of_page();
+
+					$result[] = isset($page_type) && $value === $page_type;
+					break;
+				}
+			
+				case 'page_or_post_is': {
+					$post_id = (is_singular()) ? $post->ID : false;
+
+					$result[] = isset($post_id) && $value === $post_id;
+					break;
+				}
+			
+				case 'page_or_post_is_not': {
+					$post_id = (is_singular()) ? $post->ID : false;
+
+					$result[] = isset($post_id) && $value !== $post_id;
+					break;
+				}
+			
+				case 'post_type_is': {
+					$post_type = (is_singular()) ? get_post_type() : false;
+
+					$result[] = isset($post_type) && $value === $post_type;
+					break;
+				}
+			
+				case 'post_type_is_not': {
+					$post_type = (is_singular()) ? get_post_type() : false;
+					
+					$result[] = isset($post_type) && $value !== $post_type;
+					break;
+				}
+			
+				case 'taxonomy_is': {
+					$taxonomy = userfeedback_get_taxonomy();
+
+					$result[] = isset($taxonomy) && $value === $taxonomy;
+					break;
+				}
+			
+				case 'taxonomy_is_not': {
+					$taxonomy = userfeedback_get_taxonomy();
+
+					$result[] = isset($taxonomy) && $value !== $taxonomy;
+					break;
+				}
+			
+				case 'taxonomy_term_is': {
+					$taxonomy_term = userfeedback_get_term();
+
+					$result[] = isset($taxonomy_term) && $value === $taxonomy_term;
+					break;
+				}
+			
+				case 'taxonomy_term_is_not': {
+					$taxonomy_term = userfeedback_get_term();
+
+					$result[] = isset($taxonomy_term) && $value !== $taxonomy_term;
+					break;
+				}
+			
+				case 'referrer': {
+					$referrer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : false;
+
+					$result[] = isset($referrer) && (strpos($referrer, $value) !== false || strpos($value, $referrer) !== false);
+					break;
+				}
+			
+				case 'page_url_is': {
+					$current_url = userfeedback_get_current_url();
+
+					$result[] = isset($current_url) && strpos($current_url, $value) !== false;
+					break;
+				}
+			
+				case 'page_url_is_not': {
+					$current_url = userfeedback_get_current_url();
+
+					$result[] = isset($current_url) && strpos($current_url, $value) === false;
+					break;
+				}
+			
+				case 'page_url_contains': {
+					$current_url = userfeedback_get_current_url();
+
+					$result[] = strpos($current_url, $value) !== false;
+					break;
+				}
+			
+				case 'page_url_not_contains': {
+					$current_url = userfeedback_get_current_url();
+
+					$result[] = strpos($current_url, $value) === false;
+					break;
+				}
+				
+				case 'user_role': {
+					$result[] = in_array($value, $user_roles, true);
+					break;
+				}
+		
+				case 'cookie_exist': {
+					$cookie_name = $value;
+					$result[] = isset($_COOKIE[$cookie_name]);
+					break;
+				}
+		
+				case 'cookie_not_exist': {
+					$cookie_name = $value;
+					$result[] = !isset($_COOKIE[$cookie_name]);
+					break;
+				}
+		
+				case 'query_parameter_contains': {
+					$query_param = $value;
+					$result[] = isset($_GET[$query_param]) && !empty($_GET[$query_param]);
+					break;
+				}
+		
+				case 'query_parameter_not_contains': {
+					$query_param = $value;
+					$result[] = !isset($_GET[$query_param]);
+					break;
+				}
+		
+				case 'query_parameter_regex': {
+					$pattern = $value;
+					$found = false;
+					foreach ($_GET as $param => $param_value) {
+						if (preg_match($pattern, $param_value)) {
+							$found = true;
+							break;
+						}
+					}
+					$result[] = $found;
+					break;
+				}
+		
+				default:
+					// Handle unknown logic cases if needed
+					break;
+			}
+		}
+		
+
+		return $result;
+	}
+
+	/**
+	 * Main function to filter and return all matched surveys based on the rules.
+	 * 
+	 * @param array $surveys Array of surveys.
+	 * @return array Array of all matching surveys.
+	 */
+	private function filter_surveys_by_advanced_targeting($surveys) {
+		$matchedSurveys = [];
+
+		foreach ($surveys as $survey) {
+			if (!isset($survey->settings) || !is_object($survey->settings)) {
+				continue;
+			}
+			$settings = $survey->settings;
+	
+			if (!isset($settings->targeting) || !is_object($settings->targeting)) {
+				continue;
+			}
+			$targeting = $settings->targeting;
+
+			if (isset($targeting->pages) && $targeting->pages === 'all') {
+				// This survey is for all pages
+				$matchedSurveys[] = $survey;
+				continue;
+			}
+	
+			if (!isset($targeting->page_rules) || !is_array($targeting->page_rules)) {
+				continue;
+			}
+			$rules = $targeting->page_rules;
+
+			$andRules = [];
+			$orRules = [];
+			
+			foreach ($rules as $index => $rule) {
+				$nextRule = isset($rules[$index + 1]) ? $rules[$index + 1] : false;
+
+				if (
+					(
+						empty($rule->operator) && $nextRule && isset($nextRule->operator) && $nextRule->operator === '||'
+					) 
+					||
+					(
+						isset($rule->operator) && $rule->operator === '||'
+					)
+				) {
+					$orRules[] = $rule;
+				} else {
+					$andRules[] = $rule;
+				}
+			}
+
+			// Process AND rules
+			$processAndRules = $this->process_rules($andRules);
+			$andRulesResult = empty($processAndRules) || !in_array(false, $processAndRules, true);
+
+			// Process OR rules
+			$processOrRules = $this->process_rules($orRules);
+			$orRulesResult = empty($processOrRules) || in_array(true, $processOrRules, true);
+
+			// Final result: add survey if it passes both AND and OR rule conditions
+			if ($andRulesResult && $orRulesResult) {
+				$matchedSurveys[] = $survey;
+			}
+		}
+
+		return $matchedSurveys;
 	}
 
 	/**
@@ -396,6 +670,8 @@ class UserFeedback_Frontend
 			->sort('id', 'desc')
 			->get();
 
+		$surveys = $this->filter_surveys_by_advanced_targeting( $surveys );
+
 		$surveys = array_map(
 			function ($survey) {
 				$thank_you_config = $survey->settings->thank_you;
@@ -405,6 +681,16 @@ class UserFeedback_Frontend
 
 					if ('publish' == get_post_status($page_id)) {
 						$thank_you_config->redirect_url = get_permalink($page_id);
+					}
+				} else if ($thank_you_config->type === 'conditional_redirect' && is_array($thank_you_config->conditions)) {
+					foreach ($thank_you_config->conditions as &$condition) {
+						if (isset($condition->page->id)) {
+							$page_id = $condition->page->id;
+	
+							if ('publish' == get_post_status($page_id)) {
+								$condition->redirect_url = get_permalink($page_id);
+							}
+						}
 					}
 				}
 
@@ -517,6 +803,25 @@ class UserFeedback_Frontend
 			userfeedback_get_asset_version(),
 			true
 		);
+
+		// This adds `defer` attribute to js files
+		add_filter( 'script_loader_tag', function ( $tag, $handle ) {
+			if (
+				in_array(
+					$handle, 
+					array(
+						'userfeedback-frontend-vendors',
+						'userfeedback-frontend-common',
+						'userfeedback-frontend-widget'
+					),
+					true
+				)
+			) {
+				return str_replace( ' src', ' defer src', $tag );
+			}
+		
+			return $tag;
+		}, 10, 2 );
 	}
 
 	/**
@@ -583,16 +888,6 @@ class UserFeedback_Frontend
 						'id'   => $post->ID,
 						'name' => $post->post_title,
 					),
-					'logic' => [
-						'user_logged_in' => is_user_logged_in(),
-						'page_type' => userfeedback_get_type_of_page(),
-						'post_type' => (is_singular()) ? get_post_type() : false,
-						'post_id' => (is_singular()) ? $post->ID : false,
-						'taxonomy' => userfeedback_get_taxonomy(),
-						'taxonomy_term' => userfeedback_get_term(),
-						'current_url' => userfeedback_get_current_url(),
-						'referrer' => isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : false,
-					],
 					'disable_all_surveys' => userfeedback_disable_all_surveys(),
 					'show_specific_survey' => userfeedback_show_specific_survey(),
 					'is_singular' => is_singular(),

@@ -94,9 +94,6 @@ class UserFeedback_Review {
 					?>
 				</p>
 				<p>
-					<strong><?php echo wp_kses( __( '~ Syed Balkhi<br>Founder of UserFeedback', 'userfeedback' ), array( 'br' => array() ) ); ?></strong>
-				</p>
-				<p>
 					<a href="https://wordpress.org/support/plugin/userfeedback-lite/reviews/?filter=5#new-post"
 					   class="userfeedback-dismiss-review-notice userfeedback-review-out" target="_blank"
 					   rel="noopener noreferrer"><?php esc_html_e( 'Ok, you deserve it', 'userfeedback' ); ?></a><br>

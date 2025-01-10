@@ -5,7 +5,7 @@
  * Plugin URI: https://www.userfeedback.com/lite?utm_source=liteplugin&utm_medium=pluginlist
  * Description: See what your analytics software isn’t telling you with powerful UserFeedback surveys.
  * Author: UserFeedback Team
- * Version: 1.2.0
+ * Version: 1.4.0
  * Requires PHP: 5.6
  * Requires at least: 5.9.0
  * Author URI: https://userfeedback.com/lite
@@ -103,11 +103,12 @@ final class UserFeedback_Lite extends UserFeedback_Base {
 					'<a target="_blank" rel="noopener" href="' . $upgrade_link . '">',
 					'</a>'
 				),
-				'icon'    => 'exclamation-circle'
+				'icon'    => 'exclamation-circle',
+                'global'  => true,
 			);
 		}
 
-		// AI Summary upsell - mark the notce as dismissed if the user has seen it in the last 14 days.
+		// AI Summary upsell - mark the notice as dismissed if the user has seen it in the last 14 days.
 		$user_show_ai_summary = get_user_meta( get_current_user_id(), userfeedback_get_notice_hide_opt_prefix() . 'ai-summary-upsell', true );
 
 		$notices[]    = array(

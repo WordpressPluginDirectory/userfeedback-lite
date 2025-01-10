@@ -120,7 +120,62 @@ function userfeedback_admin_menu() {
 	}
 
 }
-add_action( 'admin_menu', 'userfeedback_admin_menu' );
+
+/**
+ * Register admin bar menu items for UserFeedback.
+ *
+ * @since 1.3.0
+ * 
+ * @param $admin_bar
+ * @return void
+ */
+function userfeedback_admin_bar_menu( $admin_bar ) {
+	$admin_bar->add_node([
+		'id' => 'userfeedback-admin-bar',
+		'title' => __( 'UserFeedback', 'userfeedback' )
+	]);
+
+	$admin_bar->add_node([
+		'id'    => 'userfeedback-admin-bar-all-surveys',
+		'title' => __( 'All Surveys', 'userfeedback' ),
+		'parent' => 'userfeedback-admin-bar',
+		'href'  => site_url( '/wp-admin/admin.php?page=userfeedback_surveys#/' )
+	]);
+
+	$admin_bar->add_node([
+		'id'    => 'userfeedback-admin-bar-responses',
+		'title' => __( 'Responses', 'userfeedback' ),
+		'parent'=> 'userfeedback-admin-bar',
+		'href'  => site_url( '/wp-admin/admin.php?page=userfeedback_results#/' )
+	]);
+
+	$admin_bar->add_node([
+		'id'     => 'userfeedback-admin-bar-help',
+		'title'  => __( 'Help', 'userfeedback' ),
+		'parent' => 'userfeedback-admin-bar',
+		'href'   => userfeedback_get_url( 'admin-menu', 'admin-bar', 'https://www.userfeedback.com/docs/' ),
+		'meta'   => [
+			'target' => '_blank'
+		]
+	]);
+
+	if ( ! userfeedback_is_pro_version() ) {
+		$admin_bar->add_node([
+			'id'     => 'userfeedback-admin-bar-upgrade-pro',
+			'title'  => __( 'Upgrade to Pro', 'userfeedback' ),
+			'parent' => 'userfeedback-admin-bar',
+			'href'   => userfeedback_get_upgrade_link( 'admin-menu', 'admin-bar', 'https://www.userfeedback.com/lite/' ),
+			'meta'   => [
+				'target' => '_blank'
+			]
+		]);
+	}
+}
+
+if ( is_admin() ) {
+	add_action( 'admin_menu', 'userfeedback_admin_menu' );
+	add_action('admin_bar_menu', 'userfeedback_admin_bar_menu', 100);
+}
 
 // ----------------------------------------------------
 // ------------ Menu Callback functions ---------------

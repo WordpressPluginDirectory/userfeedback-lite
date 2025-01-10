@@ -63,6 +63,10 @@ class UserFeedback_Logic_Type
 				$data = $this->userLoggedInOptions($request);
 				break;
 
+			case 'wp_user_roles':
+				$data = $this->wpUserRoleOptions($request);
+				break;
+
 			case 'wp_page_type':
 				$data = $this->wpPageTypeOptions($request);
 				break;
@@ -150,6 +154,34 @@ class UserFeedback_Logic_Type
 		}
 
 		return $data;
+	}
+
+	protected function wpUserRoleOptions($request)
+	{
+		$search = $request->get_param('search');
+
+		if ( ! isset( $wp_roles ) ) {
+			$wp_roles = wp_roles();
+		}
+	
+		$roles = array();
+
+		foreach ( $wp_roles->roles as $role_key => $role ) {
+			$roles[] = array(
+				'id'    => $role_key,
+				'label' => $role['name']
+			);
+		}
+
+		if ($search) {
+			$roles = array_values(array_filter(array_map(function ($item) use ($search) {
+				if (strpos(strtolower($item['label']), strtolower($search)) !==  false) {
+					return $item;
+				}
+			}, $roles)));
+		}
+
+		return $roles;
 	}
 
 	protected function postTypeOptions($request)

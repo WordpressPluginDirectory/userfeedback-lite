@@ -254,7 +254,7 @@ if (!class_exists('UserFeedback_Metabox')) {
                             <?php _e( 'Activate Targeting Addon.', 'userfeedback' ); ?>
                         </span>
 					<div class="userfeedback-metabox-pro-badge-upgrade">
-						<a href="<?php echo esc_url(admin_url('admin.php?page=userfeedback_settings#/addons')); ?>"
+						<a href="<?php echo esc_url(admin_url('admin.php??page=userfeedback_addons')); ?>"
 						   target="_blank" rel="noopener">
 							<?php _e( 'Activate', 'userfeedback' ); ?>
 						</a>
