@@ -146,7 +146,7 @@ class UserFeedback_Email_Summaries {
 	public function get_header_image() {
 		// set default header image
 		$img = array(
-			'url' => plugins_url( 'assets/img/emails/userfeedback-logo.png', USERFEEDBACK_PLUGIN_FILE ),
+			'url' => plugins_url( 'assets/img/emails/userfeedback-logo-white.png', USERFEEDBACK_PLUGIN_FILE ),
 			'2x'  => '', // plugins_url( "assets/img/emails/logo-MonsterInsights@2x.png", USERFEEDBACK_PLUGIN_FILE ),
 		);
 
@@ -156,6 +156,23 @@ class UserFeedback_Email_Summaries {
 		}
 
 		return apply_filters( 'userfeedback_email_header_image', $img );
+	}
+
+	/**
+	 * Get the email footer image.
+	 *
+	 * @since 1.10.0
+	 *
+	 * @return string The email from address.
+	 */
+	public function get_footer_image() {
+		// set default footer image
+		$img = array(
+			'url' => plugins_url( 'assets/img/emails/userfeedback-logo.png', USERFEEDBACK_PLUGIN_FILE ),
+			'2x'  => '', // plugins_url( "assets/img/emails/logo-MonsterInsights@2x.png", USERFEEDBACK_PLUGIN_FILE ),
+		);
+
+		return apply_filters( 'userfeedback_email_footer_image', $img );
 	}
 
 	/**
@@ -206,7 +223,7 @@ class UserFeedback_Email_Summaries {
 	public function add_weekly_cron_schedule( $schedules ) {
 		$schedules['userfeedback_email_summaries_weekly'] = array(
 			'interval' => WEEK_IN_SECONDS,
-			'display'  => esc_html__( 'Weekly UserFeedback Email Summaries', 'userfeedback' ),
+			'display'  => esc_html__( 'Weekly UserFeedback Email Summaries', 'userfeedback-lite' ),
 		);
 
 		return $schedules;
@@ -224,7 +241,7 @@ class UserFeedback_Email_Summaries {
 		$site_url        = isset( $site_url_parsed['host'] ) ? $site_url_parsed['host'] : $site_url;
 
 		// Translators: The domain of the site is appended to the subject.
-		$subject = sprintf( __( 'UserFeedback Summary - %s', 'userfeedback' ), $site_url );
+		$subject = sprintf( __( 'UserFeedback Summary - %s', 'userfeedback-lite' ), $site_url );
 
 		return apply_filters( 'userfeedback_emails_summaries_cron_subject', $subject );
 	}
@@ -366,10 +383,12 @@ class UserFeedback_Email_Summaries {
 
 		$args['body']['preview_title']    = $this->get_email_subject();
 		$args['body']['header_image']     = $this->get_header_image();
-		$args['body']['title']            = esc_html__( 'Hi there!', 'userfeedback' );
+		$args['body']['footer_image']     = $this->get_footer_image();
+		$args['body']['title']            = esc_html__( 'Hi there!', 'userfeedback-lite' );
+		$args['body']['blogs']            = $this->get_latest_blog_posts_from_feed();
 		$args['body']['description']      =
 			sprintf(
-				esc_html__( 'Below is the total number of survey responses for each active survey from the week of %s ', 'userfeedback' ),
+				esc_html__( 'Below is the total number of survey responses for each active survey from the week of %s ', 'userfeedback-lite' ),
 				date( 'F j, Y', strtotime( $start_date ) ) . ' - ' . date( 'F j, Y', strtotime( $end_date ) )
 			);
 
@@ -378,11 +397,12 @@ class UserFeedback_Email_Summaries {
 
         if ( empty( $summaries ) ) {
             $args['body']['description'] = sprintf(
-                esc_html__( 'No responses were recorded in any of your UserFeedback surveys the week of %s ', 'userfeedback' ),
+                esc_html__( 'No responses were recorded in any of your UserFeedback surveys the week of %s ', 'userfeedback-lite' ),
                 date( 'F j, Y', strtotime( $start_date ) ) . ' - ' . date( 'F j, Y', strtotime( $end_date ) )
             );
         }
 
+		$args['body']['survey_results_url'] = admin_url( 'admin.php?page=userfeedback_results' );
 		$args['body']['settings_tab_url'] = esc_url( admin_url( 'admin.php?page=userfeedback_settings#/email' ) );
 
 		return apply_filters( 'userfeedback_email_summaries_template_args', $args );
@@ -444,6 +464,7 @@ class UserFeedback_Email_Summaries {
 				return array(
 					'name'      => $result->survey->title,
 					'responses' => $result->count,
+					'result_link' =>  admin_url( 'admin.php?page=userfeedback_results#/survey/' . $result->survey_id ),
 				);
 			},
 			$responses
@@ -455,6 +476,71 @@ class UserFeedback_Email_Summaries {
         });
 
         return $surveys_with_count;
+	}
+
+	/**
+	 * Get the latest blog posts from the UserFeedback RSS feed.
+	 *
+	 * Fetches the RSS feed from userfeedback.com and extracts the titles and links
+	 * of the last 3 blog posts.
+	 *
+	 * @since 1.10.0
+	 * @access private
+	 *
+	 * @return array Array of the latest 3 blog posts with title and link, or empty array on failure.
+	 */
+	private function get_latest_blog_posts_from_feed() {
+		$source = 'https://userfeedback.com';
+
+		$rest_url = $source . '/wp-json/wp/v2/posts?per_page=3&_embed=wp:featuredmedia&_fields=title,excerpt,link,_embedded,_links'; // Fetch last 3 posts and embed media
+
+		$response = wp_remote_get( $rest_url );
+
+		if ( is_wp_error( $response ) ) {
+			return array(); // Return empty array on error
+		}
+
+		$body       = wp_remote_retrieve_body( $response );
+		$posts_data = json_decode( $body, true );
+		$posts      = array();
+
+		if ( empty( $posts_data ) || ! is_array( $posts_data ) ) {
+			return array();
+		}
+
+		foreach ( $posts_data as $post_item ) {
+			$featured_image_url = '';
+
+			if ( isset( $post_item['_embedded']['wp:featuredmedia'] ) && ! empty( $post_item['_embedded']['wp:featuredmedia'] ) ) {
+				$featured_media = $post_item['_embedded']['wp:featuredmedia'][0];
+
+				if ( isset( $featured_media['media_details']['sizes']['medium']['source_url'] ) ) {
+					$featured_image_url = $featured_media['media_details']['sizes']['medium']['source_url'];
+				}
+			}
+
+			if ( empty( $post_item['title']['rendered'] ) || empty( $post_item['link'] ) ) {
+				continue;
+			}
+
+			$new = array(
+				'title'            => esc_html( $post_item['title']['rendered'] ),
+				'link'             => esc_url( $post_item['link'] ),
+				'excerpt'          => ''
+			);
+			
+			if ( ! empty( $post_item['excerpt']['rendered'] ) ) {
+				$new['excerpt'] = esc_html( wp_trim_words( strip_tags( $post_item['excerpt']['rendered'] ), 15, '...' ) );
+			}
+
+			if ( ! empty( $featured_image_url ) ) {
+				$new['featured_image'] = esc_url_raw( $featured_image_url );
+			}
+
+			$posts[] = $new;
+		}
+
+		return $posts;
 	}
 }
 

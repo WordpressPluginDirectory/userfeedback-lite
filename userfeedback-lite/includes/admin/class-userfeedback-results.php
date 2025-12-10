@@ -51,6 +51,20 @@ class UserFeedback_Results {
 				'methods'             => 'GET',
 				'callback'            => array( $this, 'get_survey_responses' ),
 				'permission_callback' => array( $this, 'view_results_permission_check' ),
+				'args'                => array(
+					'filter' => array(
+						'type'              => 'object',
+						'sanitize_callback' => array( $this, 'sanitize_filter_param' ),
+					),
+					'per_page' => array(
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+					),
+					'page' => array(
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+					),
+				),
 			)
 		);
 
@@ -65,7 +79,7 @@ class UserFeedback_Results {
 					'response_ids' => array(
 						'required'          => true,
 						'type'              => 'array',
-						'description'       => __('Survey response ids.', 'userfeedback'),
+						'description'       => __('Survey response ids.', 'userfeedback-lite'),
 						'sanitize_callback' => function($ids) {
 							return array_map('esc_attr', $ids);
 						},
@@ -86,7 +100,7 @@ class UserFeedback_Results {
 					'response_ids' => array(
 						'required'          => true,
 						'type'              => 'array',
-						'description'       => __('Survey response ids.', 'userfeedback'),
+						'description'       => __('Survey response ids.', 'userfeedback-lite'),
 						'sanitize_callback' => function($ids) {
 							return array_map('esc_attr', $ids);
 						},
@@ -107,7 +121,7 @@ class UserFeedback_Results {
 					'response_ids' => array(
 						'required'          => true,
 						'type'              => 'array',
-						'description'       => __('Survey response ids.', 'userfeedback'),
+						'description'       => __('Survey response ids.', 'userfeedback-lite'),
 						'sanitize_callback' => function($ids) {
 							return array_map('esc_attr', $ids);
 						},
@@ -387,6 +401,31 @@ class UserFeedback_Results {
 		return current_user_can( 'userfeedback_view_results' );
 	}
 
+	/**
+	 * Sanitize filter parameter to prevent SQL injection
+	 *
+	 * @param mixed $filters The filter parameter value
+	 * @return array Sanitized filters with only allowed keys
+	 */
+	public function sanitize_filter_param( $filters ) {
+		if ( ! is_array( $filters ) ) {
+			return array();
+		}
+
+		$allowed_filter_attrs = array( 'status' );
+		$sanitized = array();
+
+		foreach ( $filters as $key => $value ) {
+			// Only allow whitelisted column names
+			$sanitized_key = sanitize_key( $key );
+			if ( in_array( $sanitized_key, $allowed_filter_attrs, true ) ) {
+				$sanitized[ $sanitized_key ] = sanitize_text_field( $value );
+			}
+		}
+
+		return $sanitized;
+	}
+
 
 	/**
 	 * Validate response ids callback
@@ -560,30 +599,22 @@ class UserFeedback_Results {
 
 		if ( $request->has_param( 'filter' ) ) {
 			$filters = $request->get_param( 'filter' );
-			foreach ($filters as $attr => $value) {
-				if ($value === 'all') {
+
+			foreach ( $filters as $attr => $value ) {
+				if ( $value === 'all' ) {
 					$query->add_where(
 						array(
-							'status'     => 'publish'
+							array('status', '!=', 'trash'),
 						)
 					);
 					break;
 				}
 
-				if ( $attr === 'status' && $value === 'publish' ) {
-					$query->add_where(
-						array(
-							'status'     => 'publish'
-						)
-					);
-				} else {
-					$query->add_where(
-						array(
-							$attr => $value,
-						)
-					);
-				}
-
+				$query->add_where(
+					array(
+						array( $attr, '=', $value ),
+					)
+				);
 			}
 		}
 
