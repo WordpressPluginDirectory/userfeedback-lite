@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class UserFeedback_Survey_Template_Content_Engagement extends UserFeedback_Survey_Template {
 
 	/**

@@ -68,6 +68,16 @@ function userfeedback_admin_menu() {
 		'userfeedback_post_ratings_page'
 	);
 
+	// Email Surveys
+	add_submenu_page(
+		$menu_slug,
+		__( 'Email Surveys', 'userfeedback-lite' ),
+		__( 'Email Surveys', 'userfeedback-lite' ) . $new_indicator,
+		'manage_options',
+		'userfeedback_email_surveys',
+		'userfeedback_email_surveys_page'
+	);
+
 	//  Heatmaps
 	add_submenu_page(
 		$menu_slug,
@@ -248,6 +258,15 @@ function userfeedback_post_ratings_page() {
 }
 
 /**
+ * Render UserFeedback Email Surveys page
+ *
+ * @return void
+ */
+function userfeedback_email_surveys_page() {
+	echo '<div id="userfeedback-email-surveys"></div>';
+}
+
+/**
  * Render UserFeedback Heatmap page
  *
  * @return void
@@ -352,13 +371,14 @@ add_filter( 'admin_body_class', 'userfeedback_add_admin_body_class', 10, 1 );
 function userfeedback_onboarding_first_launch()
 {
 	$surveys = UserFeedback_Survey::all();
-	if (userfeedback_screen_is_userfeedback() && isset($_GET['page']) && 'userfeedback_surveys' === $_GET['page'] && empty($surveys)) {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only check of admin page param for first-launch redirect.
+	if (userfeedback_screen_is_userfeedback() && isset($_GET['page']) && 'userfeedback_surveys' === sanitize_key( wp_unslash( $_GET['page'] ) ) && empty($surveys)) {
 		$surveys_screen_first_visit = userfeedback_get_option('userfeedback_surveys_screen_first_visit', false);
 		$userfeedback_onboarding_step = userfeedback_get_option('userfeedback_onboarding_step', false);
 		if (!$surveys_screen_first_visit && !$userfeedback_onboarding_step) {
 			userfeedback_update_option('userfeedback_surveys_screen_first_visit', true);
-			wp_redirect(admin_url('admin.php?page=userfeedback_onboarding'));
-			die();
+			wp_safe_redirect(admin_url('admin.php?page=userfeedback_onboarding'));
+			exit();
 		}
 	}
 }

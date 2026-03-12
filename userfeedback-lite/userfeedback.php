@@ -5,12 +5,14 @@
  * Plugin URI: https://www.userfeedback.com/lite?utm_source=liteplugin&utm_medium=pluginlist
  * Description: See what your analytics software isn’t telling you with powerful UserFeedback surveys.
  * Author: UserFeedback Team
- * Version: 1.10.1
+ * Version: 1.11.0
  * Requires PHP: 5.6
  * Requires at least: 5.9.0
  * Author URI: https://userfeedback.com/lite
  * Text Domain: userfeedback
  * Domain Path: /languages
+ * License: GPL-2.0+
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
  * @category            Plugin
  * @copyright           Copyright © 2022 UserFeedback
@@ -97,7 +99,8 @@ final class UserFeedback_Lite extends UserFeedback_Base {
 				'id'      => $upgrade_notice_id,
 				'content' =>
 				sprintf(
-					__( "%1\$sYou're using UserFeedback Lite%2\$s. To unlock all our features, consider %3\$supgrading to PRO%4\$s for 50&#37; off.", 'userfeedback-lite' ),
+					// translators: %1$s is the opening bold tag, %2$s is the closing bold tag, %3$s is the opening anchor tag, %4$s is the closing anchor tag.
+					__( '%1$sYou\'re using UserFeedback Lite%2$s. To unlock all our features, consider %3$supgrading to PRO%4$s for 50&#37; off.', 'userfeedback-lite' ),
 					'<b>',
 					'</b>',
 					'<a target="_blank" rel="noopener" href="' . $upgrade_link . '">',
@@ -155,11 +158,14 @@ final class UserFeedback_Lite extends UserFeedback_Base {
 			$notices[] = array(
 				'id' => 'complete-onboarding',
 				'content' => sprintf(
-					__('<p><strong>Welcome to UserFeedback!</strong><br>Thanks for installing UserFeedback to collect real user feedback from your website visitors. Now that you’ve installed our plugin, you’re less than 2 minutes away from launching a survey.</p>
-						<p><a href="%s" class="button user-feedback-button" rel="noopener">%s</a></p>', 'userfeedback-lite'),
-						$button_link,
-						$button_text
+					wp_kses(
+						// translators: %1$s is the button URL, %2$s is the button label.
+						__( '<p><strong>Welcome to UserFeedback!</strong><br>Thanks for installing UserFeedback to collect real user feedback from your website visitors. Now that you’ve installed our plugin, you’re less than 2 minutes away from launching a survey.</p><p><a href="%1$s" class="button user-feedback-button" rel="noopener">%2$s</a></p>', 'userfeedback-lite' ),
+						array( 'p' => array(), 'strong' => array(), 'br' => array(), 'a' => array( 'href' => array(), 'class' => array(), 'rel' => array() ) )
 					),
+					$button_link,
+					$button_text
+				),
 				'dismissable' => false,
 				'type' => 'info'
 			);
@@ -232,7 +238,10 @@ final class UserFeedback_Lite extends UserFeedback_Base {
 		}
 		?>
 		<div class="error">
-			<p><?php echo sprintf( esc_html__( 'Please %1$suninstall%2$s the UserFeedback Lite Plugin. Your Pro version of UserFeedback may not work as expected until the Lite version is uninstalled.', 'userfeedback-lite' ), '<a href="' . esc_url_raw($url) . '">', '</a>' ); ?></p>
+			<p><?php
+			// translators: %1$s is an opening anchor tag, %2$s is the closing anchor tag.
+			echo sprintf( esc_html__( 'Please %1$suninstall%2$s the UserFeedback Lite Plugin. Your Pro version of UserFeedback may not work as expected until the Lite version is uninstalled.', 'userfeedback-lite' ), '<a href="' . esc_url_raw($url) . '">', '</a>' );
+		?></p>
 		</div>
 		<?php
 	}
@@ -250,9 +259,9 @@ final class UserFeedback_Lite extends UserFeedback_Base {
 	public function admin_footer($text){
 		global $current_screen;
 		if ( ! empty( $current_screen->id ) && strpos( $current_screen->id, 'userfeedback' ) !== false ) {
-			$url  = 'https://wordpress.org/support/plugin/userfeedback-lite/reviews/?filter=5#new-post';
+			$url  = 'https://wordpress.org/support/plugin/userfeedback-lite/reviews/#new-post';
 			$text = sprintf(
-				wp_kses( /* translators: $1$s - UserFeedback plugin name; $2$s - WP.org review link; $3$s - WP.org review link. */
+				wp_kses( /* translators: %1$s - UserFeedback plugin name; %2$s - WP.org review link; %3$s - WP.org review link. */
 					__( 'Please rate %1$s <a href="%2$s" target="_blank" rel="noopener noreferrer">&#9733;&#9733;&#9733;&#9733;&#9733;</a> on <a href="%3$s" target="_blank" rel="noopener">WordPress.org</a> to help us spread the word.', 'userfeedback-lite' ),
 					[
 						'a' => [
@@ -294,6 +303,7 @@ function userfeedback_lite_activation_hook( $network_wide ) {
 
 	if ( class_exists( 'UserFeedback' ) ) {
 		deactivate_plugins( plugin_basename( __FILE__ ) );
+		// translators: %1$s is an opening anchor tag, %2$s is the closing anchor tag.
 		wp_die( sprintf( esc_html__( 'Please uninstall and remove UserFeedback Premium before activating UserFeedback Lite. The Lite version has not been activated. %1$sClick here to return to the Dashboard%2$s.', 'userfeedback-lite' ), '<a href="' . esc_url_raw($url) . '">', '</a>' ) );
 	}
 

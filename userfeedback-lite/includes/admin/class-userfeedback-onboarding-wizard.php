@@ -45,7 +45,8 @@ class UserFeedback_Onboarding_Wizard {
 		}
 		
 		// 2. Don't load the interface if the page is not the onboarding wizard.
-		if ( ! isset( $_GET['page'] ) || 'userfeedback_onboarding' !== $_GET['page'] ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only admin page check; no data modification at this point.
+		if ( ! isset( $_GET['page'] ) || 'userfeedback_onboarding' !== sanitize_key( wp_unslash( $_GET['page'] ) ) ) {
 			return;
 		}
 		

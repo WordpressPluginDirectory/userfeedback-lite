@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if (!class_exists('UserFeedback_Base')) {
 	abstract class UserFeedback_Base
 	{
@@ -20,7 +24,7 @@ if (!class_exists('UserFeedback_Base')) {
 		 * @access public
 		 * @var string $version Plugin version
 		 */
-		public $version = '1.10.1';
+		public $version = '1.11.0';
 
 		/**
 		 * Plugin file.
@@ -169,7 +173,7 @@ if (!class_exists('UserFeedback_Base')) {
 				// This does the version to version background upgrade routines and initial install
 				$uf_version = get_option('userfeedback_current_version', '0.0.0');
 
-				if (version_compare($uf_version, '1.7.0', '<')) {
+				if (version_compare($uf_version, '1.11.0', '<')) {
 					add_action('wp_loaded', array(self::$instance, 'install_and_upgrade'));
 				}
 
@@ -277,7 +281,7 @@ if (!class_exists('UserFeedback_Base')) {
 			} elseif (file_exists($uf_mofile3)) {
 				load_textdomain('userfeedback', $uf_mofile3);
 			} else {
-				load_plugin_textdomain('userfeedback', false, $uf_mofile4);
+				load_plugin_textdomain( 'userfeedback', false, $uf_mofile4 ); // phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- Intentional fallback for custom language file directories.
 			}
 		}
 
@@ -333,6 +337,8 @@ if (!class_exists('UserFeedback_Base')) {
 			require_once USERFEEDBACK_PLUGIN_DIR . 'includes/db/class-userfeedback-heatmap.php';
 			require_once USERFEEDBACK_PLUGIN_DIR . 'includes/db/class-userfeedback-heatmap-recording.php';
 			require_once USERFEEDBACK_PLUGIN_DIR . 'includes/db/class-userfeedback-post-rating.php';
+			require_once USERFEEDBACK_PLUGIN_DIR . 'includes/db/class-userfeedback-email-survey.php';
+			require_once USERFEEDBACK_PLUGIN_DIR . 'includes/db/class-userfeedback-email-survey-response.php';
 
 			// Survey templates helper
 			require_once USERFEEDBACK_PLUGIN_DIR . 'includes/survey-templates/class-userfeedback-survey-templates.php';
@@ -382,7 +388,7 @@ if (!class_exists('UserFeedback_Base')) {
 				// Emails
 				require_once USERFEEDBACK_PLUGIN_DIR . 'includes/emails/class-userfeedback-email-summaries.php';
 
-				if (isset($_GET['page']) && 'userfeedback_onboarding' === $_GET['page']) {
+				if ( isset( $_GET['page'] ) && 'userfeedback_onboarding' === $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Checking URL parameter for conditional file loading only; no form data is processed here.
 					// Only load the Onboarding wizard if the required parameter is present.
 					require_once USERFEEDBACK_PLUGIN_DIR . 'includes/admin/class-userfeedback-onboarding-wizard.php';
 				}
@@ -540,6 +546,16 @@ if (!class_exists('UserFeedback_Base')) {
 			_doing_it_wrong(__FUNCTION__, esc_html__('Cheatin&#8217; huh?', 'userfeedback-lite'), '1.0.0');
 		}
 
+		/**
+		 * Fix the db timestamp column.
+		 *
+		 * This function is used to fix the db timestamp column for users upgrading to version 1.0.5 or more. 
+		 * Not needed for a fresh install
+		 *
+		 * @return void
+		 * @since 1.0.5
+		 * @access public
+		 */
 		public function fix_db_timestamp_column()
 		{
 			global $wpdb;
@@ -553,6 +569,14 @@ if (!class_exists('UserFeedback_Base')) {
 			if ($timestamp_fixed) {
 				return;
 			}
+
+			// Check if table exists before attempting to describe/modify it (fixes multisite errors on subsites)
+			if ( ! UserFeedback_Survey::table_exists() ) {
+				// If table does not exist, this is a new installation. Hence, does not require to run this function. 
+				update_option('userfeedback_timestamp_fixed', true);
+				return;
+			}
+
 			// get table column details
 			$table_fields = $wpdb->get_results("DESCRIBE {$wpdb->prefix}userfeedback_surveys", ARRAY_A);
 

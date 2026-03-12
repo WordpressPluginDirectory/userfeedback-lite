@@ -1,10 +1,10 @@
-=== User Feedback - Create Interactive Feedback Form, User Surveys, and Polls in Seconds  ===
+=== UserFeedback - Create Interactive Feedback Form, User Surveys, and Polls in Seconds  ===
 Contributors: chriscct7, smub
 Donate link: http://www.wpbeginner.com/wpbeginner-needs-your-help/
 Tags: analytics,feedback,surveys,user feedback, website feedback,heatmaps
 Requires at least: 5.9.0
-Tested Up To: 6.9.0
-Stable tag: 1.10.1
+Tested Up To: 6.9
+Stable tag: 1.11.0
 Requires PHP: 5.6
 License: GPL v3
 
@@ -119,6 +119,10 @@ For documentation, tutorials, FAQ and videos check out: [UserFeedback Documentat
 4. Want more features? <a href=href="https://www.userFeedback.com/?utm_source=wprepo&utm_medium=link&utm_campaign=lite" rel="friend" title="UserFeedback">Purchase UserFeedback Pro</a>!
 
 == Changelog ==
+= 1.11.0: March 11, 2026 =
+- New: Email Survey Widget, an easy way to capture instant feedback directly from email campaigns.
+- Updates: Various bug fixes and improvements.
+
 = 1.10.1: December 9, 2025 =
 - Fixed: Various bug fixes and enhancements
 

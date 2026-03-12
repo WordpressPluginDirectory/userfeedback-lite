@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 abstract class UserFeedback_Survey_Template {
 
 	/**

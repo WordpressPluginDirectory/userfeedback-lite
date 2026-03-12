@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Popular Survey Notification class.
  *
@@ -37,10 +41,12 @@ class UserFeedback_Notification_Popular_Survey extends UserFeedback_Notification
 		
 		if(isset($survey->title)){
 			$this->title   = sprintf(
+				// translators: %s is the survey title.
 				__( 'Wow! Your %s is Popular!', 'userfeedback-lite' ),
 				$survey->title
 			);
 			$this->content = sprintf(
+				// translators: %s is the survey title.
 				__( 'Your Survey, %s is popular! See what your visitors are saying', 'userfeedback-lite' ),
 				$survey->title
 			);

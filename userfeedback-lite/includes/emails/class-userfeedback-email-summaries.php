@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Email Summaries main class.
  *
@@ -184,10 +189,10 @@ class UserFeedback_Email_Summaries {
 	 */
 	protected function get_first_cron_date() {
 		$schedule           = array();
-		$schedule['day']    = rand( 0, 1 );
-		$schedule['hour']   = rand( 0, 23 );
-		$schedule['minute'] = rand( 0, 59 );
-		$schedule['second'] = rand( 0, 59 );
+		$schedule['day']    = wp_rand( 0, 1 );
+		$schedule['hour']   = wp_rand( 0, 23 );
+		$schedule['minute'] = wp_rand( 0, 59 );
+		$schedule['second'] = wp_rand( 0, 59 );
 		$schedule['offset'] = ( $schedule['day'] * DAY_IN_SECONDS ) +
 							  ( $schedule['hour'] * HOUR_IN_SECONDS ) +
 							  ( $schedule['minute'] * MINUTE_IN_SECONDS ) +
@@ -237,7 +242,7 @@ class UserFeedback_Email_Summaries {
 	public function get_email_subject() {
 
 		$site_url        = get_site_url();
-		$site_url_parsed = parse_url( $site_url );// Can't use wp_parse_url as that was added in WP 4.4 and we still support 3.8.
+		$site_url_parsed = wp_parse_url( $site_url );
 		$site_url        = isset( $site_url_parsed['host'] ) ? $site_url_parsed['host'] : $site_url;
 
 		// Translators: The domain of the site is appended to the subject.
@@ -388,8 +393,9 @@ class UserFeedback_Email_Summaries {
 		$args['body']['blogs']            = $this->get_latest_blog_posts_from_feed();
 		$args['body']['description']      =
 			sprintf(
+				// translators: %s is the date range of the week (e.g. "January 1, 2024 - January 7, 2024").
 				esc_html__( 'Below is the total number of survey responses for each active survey from the week of %s ', 'userfeedback-lite' ),
-				date( 'F j, Y', strtotime( $start_date ) ) . ' - ' . date( 'F j, Y', strtotime( $end_date ) )
+				wp_date( 'F j, Y', strtotime( $start_date ) ) . ' - ' . wp_date( 'F j, Y', strtotime( $end_date ) )
 			);
 
         $summaries = $this->get_summaries();
@@ -397,8 +403,9 @@ class UserFeedback_Email_Summaries {
 
         if ( empty( $summaries ) ) {
             $args['body']['description'] = sprintf(
+                // translators: %s is the date range of the week (e.g. "January 1, 2024 - January 7, 2024").
                 esc_html__( 'No responses were recorded in any of your UserFeedback surveys the week of %s ', 'userfeedback-lite' ),
-                date( 'F j, Y', strtotime( $start_date ) ) . ' - ' . date( 'F j, Y', strtotime( $end_date ) )
+                wp_date( 'F j, Y', strtotime( $start_date ) ) . ' - ' . wp_date( 'F j, Y', strtotime( $end_date ) )
             );
         }
 
@@ -414,7 +421,7 @@ class UserFeedback_Email_Summaries {
 	 * @since 1.0.0
 	 */
 	public function get_summaries_start_date() {
-		return date( 'Y-m-d', strtotime( '-1 day, last week' ) ); // sunday of last week
+		return wp_date( 'Y-m-d', strtotime( '-1 day, last week', current_time( 'timestamp' ) ) ); // sunday of last week
 	}
 
 	/**
@@ -423,7 +430,7 @@ class UserFeedback_Email_Summaries {
 	 * @since 1.0.0
 	 */
 	public function get_summaries_end_date() {
-		return date( 'Y-m-d', strtotime( 'last saturday' ) ); // last saturday
+		return wp_date( 'Y-m-d', strtotime( 'last saturday', current_time( 'timestamp' ) ) ); // last saturday
 	}
 
 	/**
@@ -530,7 +537,7 @@ class UserFeedback_Email_Summaries {
 			);
 			
 			if ( ! empty( $post_item['excerpt']['rendered'] ) ) {
-				$new['excerpt'] = esc_html( wp_trim_words( strip_tags( $post_item['excerpt']['rendered'] ), 15, '...' ) );
+				$new['excerpt'] = esc_html( wp_trim_words( wp_strip_all_tags( $post_item['excerpt']['rendered'] ), 15, '...' ) );
 			}
 
 			if ( ! empty( $featured_image_url ) ) {

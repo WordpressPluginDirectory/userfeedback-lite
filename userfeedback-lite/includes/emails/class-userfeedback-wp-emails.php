@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Emails.
  *
@@ -342,7 +346,7 @@ class UserFeedback_WP_Emails {
 		do_action( 'userfeedback_email_body', $email_parts['body'] );
 
 		$body    = implode( $email_parts );
-		$message = $this->process_tag( $message, false );
+		$message = $this->process_tag( $message ?? '', false );
 		$message = nl2br( $message );
 		$message = str_replace( '{email}', $message, $body );
 		// $message = make_clickable( $message );

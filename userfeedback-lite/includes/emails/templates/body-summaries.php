@@ -1,3 +1,7 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are injected by the caller via extract() or direct scope.
+?>
 <!doctype html>
 <html lang="und" dir="auto" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 
@@ -195,7 +199,7 @@
       }
 
       .header-section {
-        background-image: url('<?php echo plugins_url( "assets/img/emails/summaries-hero-bg.png", USERFEEDBACK_PLUGIN_FILE ); ?>') !important;
+        background-image: url('<?php echo esc_url( plugins_url( "assets/img/emails/summaries-hero-bg.png", USERFEEDBACK_PLUGIN_FILE ) ); ?>') !important;
         background-size: cover !important;
         background-position: center !important;
         background-repeat: no-repeat !important;
@@ -333,7 +337,7 @@
   <div class="body" style="background-color:#ffffff;" lang="und" dir="auto">
     <!-- Body Start --><!-- Survey Summary Header Start -->
     <!--[if mso | IE]><table align="center" border="0" cellpadding="0" cellspacing="0" class="header-section-outlook" role="presentation" style="width:600px;" width="600" ><tr><td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;"><![endif]-->
-    <div class="header-section" style="margin: 0px auto; width: 90%; max-width: 90%; background-image: url('<?php echo plugins_url( 'assets/img/emails/summaries-hero-bg-mobile.png', USERFEEDBACK_PLUGIN_FILE ); ?>'); background-size: contain; background-position: bottom; background-repeat: no-repeat; background-color: #295294;">
+    <div class="header-section" style="margin: 0px auto; width: 90%; max-width: 90%; background-image: url('<?php echo esc_url( plugins_url( 'assets/img/emails/summaries-hero-bg-mobile.png', USERFEEDBACK_PLUGIN_FILE ) ); ?>'); background-size: contain; background-position: bottom; background-repeat: no-repeat; background-color: #295294;">
       <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
         <tbody>
           <tr>
@@ -380,8 +384,8 @@
                     <tr>
                       <td align="center" class="hero-date-range" style="font-size: 0px; padding: 0; word-break: break-word; text-align: center;">
                         <div style="text-align: left; font-family: Inter, Arial, sans-serif; font-weight: 700; font-size: 9.73px; line-height: 100%; color: #FFFFFF; background-color: #4E78BA; display: inline-block; padding: 5px;"><?php 
-            $start_date = isset($start_date) ? $start_date : date('F j', strtotime('-7 days'));
-            $end_date = isset($end_date) ? $end_date : date('F j, Y');
+            $start_date = isset($start_date) ? $start_date : gmdate('F j', strtotime('-7 days'));
+            $end_date = isset($end_date) ? $end_date : gmdate('F j, Y');
             echo esc_html( $start_date . ' - ' . $end_date );
             ?></div>
                       </td>
@@ -409,7 +413,7 @@
                   <tbody>
                     <tr>
                       <td align="left" class="upgrade-title" style="font-size: 0px; word-break: break-word; padding: 0; background-color: #BBE3CB;" bgcolor="#BBE3CB">
-                        <div style="font-family: Inter, Arial, sans-serif; font-weight: 500; font-size: 15px; line-height: 22px; text-align: center; color: #23262E; margin-bottom: 5px;"><?php echo __( 'Upgrade is available for UserFeedback', 'userfeedback-lite' ); ?></div>
+                        <div style="font-family: Inter, Arial, sans-serif; font-weight: 500; font-size: 15px; line-height: 22px; text-align: center; color: #23262E; margin-bottom: 5px;"><?php echo esc_html__( 'Upgrade is available for UserFeedback', 'userfeedback-lite' ); ?></div>
                       </td>
                     </tr>
                     <tr>
@@ -448,7 +452,7 @@
                           <tbody>
                             <tr>
                               <td style="width:560px;">
-                                <img alt="UserFeedback Features" src="<?php echo plugins_url( 'assets/img/emails/summaries-feature-image-mobile.png', USERFEEDBACK_PLUGIN_FILE ); ?>" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="560" height="auto">
+                                <img alt="UserFeedback Features" src="<?php echo esc_url( plugins_url( 'assets/img/emails/summaries-feature-image-mobile.png', USERFEEDBACK_PLUGIN_FILE ) ); ?>" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="560" height="auto">
                               </td>
                             </tr>
                           </tbody>
@@ -462,7 +466,7 @@
                           <tbody>
                             <tr>
                               <td style="width: 100%;" width="100%">
-                                <img alt="UserFeedback Features" src="<?php echo plugins_url( 'assets/img/emails/summaries-feature-image.png', USERFEEDBACK_PLUGIN_FILE ); ?>" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="560" height="auto">
+                                <img alt="UserFeedback Features" src="<?php echo esc_url( plugins_url( 'assets/img/emails/summaries-feature-image.png', USERFEEDBACK_PLUGIN_FILE ) ); ?>" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;font-size:13px;" width="560" height="auto">
                               </td>
                             </tr>
                           </tbody>

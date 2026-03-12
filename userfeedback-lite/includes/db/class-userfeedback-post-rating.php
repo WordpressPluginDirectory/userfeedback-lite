@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Post Rating DB class.
  *
@@ -97,7 +101,8 @@ class UserFeedback_Post_Rating extends UserFeedback_DB {
             $post_id
         );
         
-        $stats = $wpdb->get_row($sql);
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $sql is prepared via $wpdb->prepare() above.
+        $stats = $wpdb->get_row( $sql );
 
         if ($stats) {
             return [

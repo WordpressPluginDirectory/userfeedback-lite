@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use WP_Rocket\Engine\License\API\User;
 
 /**
@@ -31,6 +35,16 @@ class UserFeedback_Results {
 				'methods'             => 'GET',
 				'callback'            => array( $this, 'get_results_summary' ),
 				'permission_callback' => array( $this, 'view_results_permission_check' ),
+				'args'                => array(
+					'orderby' => array(
+						'type'              => 'string',
+						'sanitize_callback' => array( $this, 'sanitize_orderby_param' ),
+					),
+					'order' => array(
+						'type'              => 'string',
+						'sanitize_callback' => array( $this, 'sanitize_order_param' ),
+					),
+				),
 			)
 		);
 
@@ -426,6 +440,31 @@ class UserFeedback_Results {
 		return $sanitized;
 	}
 
+	/**
+	 * Sanitize orderby parameter to prevent SQL injection
+	 *
+	 * @param string $orderby
+	 * @return string
+	 */
+	public function sanitize_orderby_param( $orderby ) {
+		// Allowed columns for survey queries
+		$allowed_orderby = array( 'id', 'title', 'status', 'type', 'impressions', 'publish_at', 'created_at' );
+
+		$orderby = sanitize_key( $orderby );
+
+		return in_array( $orderby, $allowed_orderby, true ) ? $orderby : 'created_at';
+	}
+
+	/**
+	 * Sanitize order parameter
+	 *
+	 * @param string $order
+	 * @return string
+	 */
+	public function sanitize_order_param( $order ) {
+		$order = strtolower( sanitize_key( $order ) );
+		return in_array( $order, array( 'asc', 'desc' ), true ) ? $order : 'desc';
+	}
 
 	/**
 	 * Validate response ids callback
@@ -434,10 +473,12 @@ class UserFeedback_Results {
 	 */
 	public function validate_response_ids($ids) {
 		global $wpdb;
-		$table_name = (new UserFeedback_Response())->get_table();
-		$placeholders = array_fill(0, count($ids), '%d');
-		$query = $wpdb->prepare("SELECT * FROM $table_name WHERE id IN (" . implode(', ', $placeholders) . ")", $ids);
-		$result = $wpdb->get_results($query);
+		$table_name   = $wpdb->prefix . 'userfeedback_survey_responses';
+		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is hardcoded safe prefix + known table name.
+		$query  = $wpdb->prepare( "SELECT * FROM {$table_name} WHERE id IN ({$placeholders})", ...$ids );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Prepared via $wpdb->prepare() above; direct query required for IN() validation.
+		$result = $wpdb->get_results( $query ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 		return count($result) === count($ids);
 	}
 
@@ -600,6 +641,11 @@ class UserFeedback_Results {
 		if ( $request->has_param( 'filter' ) ) {
 			$filters = $request->get_param( 'filter' );
 
+			// Sanitization callback should have already cleaned this
+			if ( ! is_array( $filters ) ) {
+				$filters = array();
+			}
+
 			foreach ( $filters as $attr => $value ) {
 				if ( $value === 'all' ) {
 					$query->add_where(
@@ -610,6 +656,7 @@ class UserFeedback_Results {
 					break;
 				}
 
+				// Only 'status' should reach here due to sanitization
 				$query->add_where(
 					array(
 						array( $attr, '=', $value ),

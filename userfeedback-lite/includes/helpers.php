@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Is This UserFeedback Pro?
  *
@@ -109,7 +113,7 @@ function userfeedback_is_dev_url($url = '')
 	if (false === strpos($url, 'http://') && false === strpos($url, 'https://')) {
 		$url = 'http://' . $url;
 	}
-	$url_parts = parse_url($url);
+	$url_parts = wp_parse_url( $url );
 	$host      = !empty($url_parts['host']) ? $url_parts['host'] : false;
 	if (!empty($url) && !empty($host)) {
 		if (false !== ip2long($host)) {
@@ -227,8 +231,8 @@ function userfeedback_date_is_between($start_date, $end_date)
 
 	$current_date = current_time('Y-m-d');
 
-	$start_date = date('Y-m-d', strtotime($start_date));
-	$end_date   = date('Y-m-d', strtotime($end_date));
+	$start_date = wp_date( 'Y-m-d', strtotime( $start_date ) );
+	$end_date   = wp_date( 'Y-m-d', strtotime( $end_date ) );
 
 	if (($current_date >= $start_date) && ($current_date <= $end_date)) {
 		return true;
@@ -296,6 +300,39 @@ function userfeedback_post_ratings_upsell()
 {
 	$post_ratings_basename = userfeedback_get_plugin_basename_from_slug( 'userfeedback-post-ratings' );
 	return ! userfeedback_is_pro_version() || ( ! is_plugin_active( $post_ratings_basename ) ) || ! userfeedback_post_ratings_is_licensed();
+}
+
+function userfeedback_screen_is_email_survey()
+{
+	$screen = get_current_screen();
+	return strpos($screen->id, 'userfeedback_email_surveys') !== false;
+}
+
+function userfeedback_email_survey_is_licensed()
+{
+	$slug = 'email-surveys';
+	$addons = userfeedback_get_parsed_addons();
+
+	$is_email_survey_licensed = false;
+
+	if (isset($addons[$slug])) {
+		$addon = $addons[$slug];
+		if ($addon instanceof stdClass) {
+			$addon = array( $addon );
+		}
+
+		if (isset($addon['type']) && $addon['type'] === 'licensed') {
+			$is_email_survey_licensed = true;
+		}
+	}
+
+	return $is_email_survey_licensed;
+}
+
+function userfeedback_email_survey_upsell()
+{
+	$email_survey_basename = userfeedback_get_plugin_basename_from_slug( 'userfeedback-email-surveys' );
+	return ! userfeedback_is_pro_version() || ( ! is_plugin_active( $email_survey_basename ) ) || ! userfeedback_email_survey_is_licensed();
 }
 
 function userfeedback_screen_is_settings()

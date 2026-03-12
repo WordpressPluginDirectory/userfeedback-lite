@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Install plugins which are not addons.
  */
@@ -16,6 +20,7 @@ function userfeedback_install_plugin()
 	}
 
 	$slug = isset($post_data['slug']) ? sanitize_text_field(wp_unslash($post_data['slug'])) : false;
+	$activate = isset($post_data['activate']) ? (bool) $post_data['activate'] : false;
 
 	if (!$slug) {
 		wp_send_json(
@@ -94,6 +99,15 @@ function userfeedback_install_plugin()
 
 	// Flush the cache and return the newly installed plugin basename.
 	wp_cache_flush();
+	
+	// Activate plugin if requested
+	if ( $activate ) {
+		$plugin_basename = $installer->plugin_info();
+		if ( $plugin_basename ) {
+			activate_plugin( $plugin_basename, '', false, true );
+		}
+	}
+	
 	wp_send_json_success();
 	wp_die();
 }
@@ -132,6 +146,10 @@ add_action( 'wp_ajax_userfeedback_activate_plugin', 'userfeedback_activate_plugi
  */
 function userfeedback_get_plugins()
 {
+	check_ajax_referer( 'uf-admin-nonce', 'nonce' );
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( array( 'error' => esc_html__( 'You are not allowed to access this.', 'userfeedback-lite' ) ) );
+	}
 
 	if (!function_exists('get_plugins')) {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';

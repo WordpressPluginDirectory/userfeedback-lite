@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Awesome Motive Deactivation Survey.
  *
@@ -168,8 +172,8 @@ class UserFeedback_AM_Deactivation_Survey {
 		<script type="text/javascript">
 			(function($) {
 				$(function() {
-					var $deactivateLink = $('#the-list').find('[data-slug="<?php echo $this->plugin; ?>"] span.deactivate a'),
-						$overlay		= $('#am-deactivate-survey-<?php echo $this->plugin; ?>'),
+					var $deactivateLink = $('#the-list').find('[data-slug="<?php echo esc_js( $this->plugin ); ?>"] span.deactivate a'),
+						$overlay		= $('#am-deactivate-survey-<?php echo esc_js( $this->plugin ); ?>'),
 						$form		    = $overlay.find('form'),
 						$closeButton	= $overlay.find('#am-deactivate-survey-close'),
 						formOpen		= false;
@@ -181,7 +185,7 @@ class UserFeedback_AM_Deactivation_Survey {
 						* If not, we'll do it this way.
 						*/
 					if (0 === $deactivateLink.length) {
-						$deactivateLink = $('#deactivate-<?php echo $this->plugin; ?>');
+						$deactivateLink = $('#deactivate-<?php echo esc_js( $this->plugin ); ?>');
 					}
 
 					// Plugin listing table deactivate link.
@@ -216,7 +220,7 @@ class UserFeedback_AM_Deactivation_Survey {
 						if (! $form.find('input[type=radio]:checked').val()) {
 							// Clear any existing error messages before adding new one
 							$form.find('.am-deactivate-survey-footer .error').remove();
-							$form.find('.am-deactivate-survey-footer').prepend('<span class="error"><?php echo esc_js( __( 'Please select an option', 'AWESOMEMOTIVE_GENERIC_TEXTDOMAIN' ) ); ?></span>');
+							$form.find('.am-deactivate-survey-footer').prepend('<span class="error"><?php echo esc_js( __( 'Please select an option', 'userfeedback-lite' ) ); ?></span>');
 							return;
 						}
 
@@ -239,7 +243,7 @@ class UserFeedback_AM_Deactivation_Survey {
 						}
 
 						var submitSurvey = $.post(
-							'<?php echo $this->api_url; ?>',
+							'<?php echo esc_url( $this->api_url ); ?>',
 							data
 						);
 						submitSurvey.always(function() {
@@ -364,26 +368,26 @@ class UserFeedback_AM_Deactivation_Survey {
 
 		$options = array(
 			1 => array(
-				'title' => esc_html__( 'I no longer need the plugin', 'AWESOMEMOTIVE_GENERIC_TEXTDOMAIN' ),
+				'title' => esc_html__( 'I no longer need the plugin', 'userfeedback-lite' ),
 			),
 			2 => array(
-				'title'   => esc_html__( 'I\'m switching to a different plugin', 'AWESOMEMOTIVE_GENERIC_TEXTDOMAIN' ),
-				'details' => esc_html__( 'Please share which plugin', 'AWESOMEMOTIVE_GENERIC_TEXTDOMAIN' ),
+				'title'   => esc_html__( 'I\'m switching to a different plugin', 'userfeedback-lite' ),
+				'details' => esc_html__( 'Please share which plugin', 'userfeedback-lite' ),
 			),
 			3 => array(
-				'title' => esc_html__( 'I couldn\'t get the plugin to work', 'AWESOMEMOTIVE_GENERIC_TEXTDOMAIN' ),
-				'details' => esc_html__( 'We\'re sorry to hear. Can you let us know what didn\'t work?', 'AWESOMEMOTIVE_GENERIC_TEXTDOMAIN' ),
+				'title' => esc_html__( 'I couldn\'t get the plugin to work', 'userfeedback-lite' ),
+				'details' => esc_html__( 'We\'re sorry to hear. Can you let us know what didn\'t work?', 'userfeedback-lite' ),
 			),
 			4 => array(
-				'title' => esc_html__( 'It\'s a temporary deactivation', 'AWESOMEMOTIVE_GENERIC_TEXTDOMAIN' ),
+				'title' => esc_html__( 'It\'s a temporary deactivation', 'userfeedback-lite' ),
 			),
 			5 => array(
-				'title'   => esc_html__( 'Other', 'AWESOMEMOTIVE_GENERIC_TEXTDOMAIN' ),
-				'details' => esc_html__( 'Please share the reason', 'AWESOMEMOTIVE_GENERIC_TEXTDOMAIN' ),
+				'title'   => esc_html__( 'Other', 'userfeedback-lite' ),
+				'details' => esc_html__( 'Please share the reason', 'userfeedback-lite' ),
 			),
 		);
 		?>
-		<div class="am-deactivate-survey-modal" id="am-deactivate-survey-<?php echo $this->plugin; ?>">
+		<div class="am-deactivate-survey-modal" id="am-deactivate-survey-<?php echo esc_attr( $this->plugin ); ?>">
 			<div class="am-deactivate-survey-wrap">
 				<form class="am-deactivate-survey" method="post">
 					<span id="am-deactivate-survey-close">
@@ -392,24 +396,33 @@ class UserFeedback_AM_Deactivation_Survey {
 							<path d="M6 6L18 18" stroke="#C4C4C4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 						</svg>
 					</span>
-					<span class="am-deactivate-survey-title"><span class="dashicons dashicons-testimonial"></span><?php echo ' ' . esc_html__( 'Quick Feedback', 'AWESOMEMOTIVE_GENERIC_TEXTDOMAIN' ); ?></span>
-					<span class="am-deactivate-survey-desc"><?php printf( esc_html__( 'If you have a moment, please share why you are deactivating %s:', 'AWESOMEMOTIVE_GENERIC_TEXTDOMAIN' ), $this->name ); ?></span>
+					<span class="am-deactivate-survey-title"><span class="dashicons dashicons-testimonial"></span><?php echo ' ' . esc_html__( 'Quick Feedback', 'userfeedback-lite' ); ?></span>
+					<span class="am-deactivate-survey-desc"><?php
+						// translators: %s is the plugin name.
+						printf( esc_html__( 'If you have a moment, please share why you are deactivating %s:', 'userfeedback-lite' ), esc_html( $this->name ) );
+					?></span>
 					<div class="am-deactivate-survey-options">
 						<?php foreach ( $options as $id => $option ) : ?>
 							<div class="am-deactivate-survey-option">
-								<label for="am-deactivate-survey-option-<?php echo $this->plugin; ?>-<?php echo $id; ?>" class="am-deactivate-survey-option-label">
-									<input id="am-deactivate-survey-option-<?php echo $this->plugin; ?>-<?php echo $id; ?>" class="am-deactivate-survey-option-input" type="radio" name="code" value="<?php echo $id; ?>" />
-									<span class="am-deactivate-survey-option-reason"><?php echo $option['title']; ?></span>
+								<label for="am-deactivate-survey-option-<?php echo esc_attr( $this->plugin ); ?>-<?php echo esc_attr( $id ); ?>" class="am-deactivate-survey-option-label">
+									<input id="am-deactivate-survey-option-<?php echo esc_attr( $this->plugin ); ?>-<?php echo esc_attr( $id ); ?>" class="am-deactivate-survey-option-input" type="radio" name="code" value="<?php echo esc_attr( $id ); ?>" />
+									<span class="am-deactivate-survey-option-reason"><?php echo esc_html( $option['title'] ); ?></span>
 								</label>
 								<?php if ( ! empty( $option['details'] ) ) : ?>
-									<input class="am-deactivate-survey-option-details" type="text" placeholder="<?php echo $option['details']; ?>" />
+									<input class="am-deactivate-survey-option-details" type="text" placeholder="<?php echo esc_attr( $option['details'] ); ?>" />
 								<?php endif; ?>
 							</div>
 						<?php endforeach; ?>
 					</div>
 					<div class="am-deactivate-survey-footer">
-						<button type="submit" class="am-deactivate-survey-submit button button-primary button-large"><?php printf( esc_html__( 'Submit %s Deactivate', 'AWESOMEMOTIVE_GENERIC_TEXTDOMAIN' ), '&amp;' ); ?></button>
-						<a href="#" class="am-deactivate-survey-deactivate"><?php printf( esc_html__( 'Skip %s Deactivate', 'AWESOMEMOTIVE_GENERIC_TEXTDOMAIN' ), '&amp;' ); ?></a>
+						<button type="submit" class="am-deactivate-survey-submit button button-primary button-large"><?php
+						// translators: %s is an ampersand symbol.
+						printf( esc_html__( 'Submit %s Deactivate', 'userfeedback-lite' ), '&amp;' );
+					?></button>
+						<a href="#" class="am-deactivate-survey-deactivate"><?php
+						// translators: %s is an ampersand symbol.
+						printf( esc_html__( 'Skip %s Deactivate', 'userfeedback-lite' ), '&amp;' );
+					?></a>
 					</div>
 				</form>
 			</div>

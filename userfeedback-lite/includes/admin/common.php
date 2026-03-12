@@ -164,6 +164,15 @@ function userfeedback_admin_styles() {
 		);
 	}
 
+	if ( userfeedback_screen_is_email_survey() ) {
+		wp_enqueue_style(
+			'userfeedback-vue-email-surveys',
+			userfeedback_get_admin_asset_url( '/assets/vue/css/email-surveys.css' ),
+			array(),
+			userfeedback_get_asset_version()
+		);
+	}
+
 	if ( userfeedback_screen_is_post_ratings() ) {
 		wp_enqueue_style(
 			'userfeedback-vue-post-ratings',
@@ -373,6 +382,25 @@ function userfeedback_admin_scripts() {
 	// --------------------------------------------------
 
 	// --------------------------------------------------
+	// --------------- Email Surveys Upsell scripts ------------------
+	if ( userfeedback_screen_is_email_survey() && userfeedback_email_survey_upsell() ) {
+		wp_register_script(
+			'userfeedback-vue-email-surveys-upsell-script',
+			userfeedback_get_admin_asset_url( '/assets/vue/js/email-surveys-upsell.js' ),
+			apply_filters( 'userfeedback_email_surveys_script_dependencies', array() ),
+			userfeedback_get_asset_version(),
+			true
+		);
+		wp_enqueue_script( 'userfeedback-vue-email-surveys-upsell-script' );
+		wp_localize_script(
+			'userfeedback-vue-email-surveys-upsell-script',
+			'userfeedback',
+			userfeedback_get_common_script_localization_object()
+		);
+	}
+	// --------------------------------------------------
+
+	// --------------------------------------------------
 	// -------------- Settings scripts ------------------
 	if ( userfeedback_screen_is_settings() ) {
 
@@ -472,6 +500,7 @@ function userfeedback_get_common_script_localization_object() {
 	return apply_filters(
 		'userfeedback_admin_script_localization',
 		array(
+			'base_url'                  => home_url(),
 			'ajax'                      => admin_url( 'admin-ajax.php' ),
 			'nonce'                     => wp_create_nonce( 'uf-admin-nonce' ),
 			'wp_rest_nonce'             => wp_create_nonce( 'wp_rest' ),

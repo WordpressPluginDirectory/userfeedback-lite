@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Frontend class.
  *
@@ -97,6 +101,7 @@ class UserFeedback_Frontend
 					'is_valid' => false,
 					'errors'   => array(
 						sprintf(
+							// translators: %s is the question ID.
 							__("Question [%s] can't take an array as value.", 'userfeedback-lite'),
 							$question->id
 						),
@@ -138,6 +143,7 @@ class UserFeedback_Frontend
 
 				if (!$value_is_allowed) {
 					$errors[] = sprintf(
+						// translators: %s is the value that was submitted.
 						__('Value "%s" is not allowed', 'userfeedback-lite'),
 						$value
 					);
@@ -189,6 +195,7 @@ class UserFeedback_Frontend
 				'success' => false,
 				'errors'  => array(
 					sprintf(
+						// translators: %s is the survey ID.
 						__('Survey with id %s does not exist.', 'userfeedback-lite'),
 						$survey_id
 					),
@@ -358,10 +365,18 @@ class UserFeedback_Frontend
 	 */
 	public function enqueue_styles_and_scripts_for_surveys()
 	{
-		global $wp_query, $post;
+		global $post;
+
+		if (empty($post)) {
+			return;
+		}
 
 		$user_is_admin = current_user_can('administrator');
-		if (empty($post) || ($user_is_admin && !apply_filters('userfeedback_enable_surveys_for_admins', false))) {
+		$show_surveys_to_admin = apply_filters('userfeedback_enable_surveys_for_admins', false);
+
+		// If admin is excluded from surveys, show the exclusion banner instead
+		if ($user_is_admin && !$show_surveys_to_admin) {
+			$this->render_exclusion_banner('administrator');
 			return;
 		}
 
@@ -508,7 +523,7 @@ class UserFeedback_Frontend
 				}
 
 				case 'referrer': {
-					$referrer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : false;
+					$referrer = isset($_SERVER['HTTP_REFERER']) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : false; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 					$result[] = isset($referrer) && (strpos($referrer, $value) !== false || strpos($value, $referrer) !== false);
 					break;
@@ -561,20 +576,20 @@ class UserFeedback_Frontend
 
 				case 'query_parameter_contains': {
 					$query_param = $value;
-					$result[] = isset($_GET[$query_param]) && !empty($_GET[$query_param]);
+					$result[] = isset($_GET[$query_param]) && !empty($_GET[$query_param]); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonces are not appropriate for frontend public GET params used for survey targeting.
 					break;
 				}
 
 				case 'query_parameter_not_contains': {
 					$query_param = $value;
-					$result[] = !isset($_GET[$query_param]);
+					$result[] = !isset($_GET[$query_param]); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonces are not appropriate for frontend public GET params used for survey targeting.
 					break;
 				}
 
 				case 'query_parameter_regex': {
 					$pattern = $value;
 					$found = false;
-					foreach ($_GET as $param => $param_value) {
+					foreach ($_GET as $param => $param_value) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonces are not appropriate for frontend public GET params used for survey targeting.
 						if (preg_match($pattern, $param_value)) {
 							$found = true;
 							break;
@@ -845,9 +860,7 @@ class UserFeedback_Frontend
 						array(),
 						userfeedback_get_asset_version()
 					);
-					echo "<style>.userfeedback-widget * {
-						font-family: '{$userfeedback_settings['widget_font']['family']}' !important;
-					}</style>";
+					echo '<style>.userfeedback-widget * { font-family: \'' . esc_attr( $userfeedback_settings['widget_font']['family'] ) . '\' !important; }</style>';
 				}
 
 			},
@@ -1017,6 +1030,91 @@ class UserFeedback_Frontend
 	public static function get_survey_cookie_name($survey)
 	{
 		return self::$USERFEEDBACK_SURVEY_COOKIE_PREFIX . $survey->id;
+	}
+
+	/**
+	 * Render exclusion banner for logged-in users who are excluded from seeing surveys
+	 *
+	 * @since 1.x.x
+	 * @param string $exclusion_reason Reason for exclusion (e.g., 'administrator', 'role')
+	 * @return void
+	 */
+	private function render_exclusion_banner($exclusion_reason = 'administrator')
+	{
+		// Get banner configuration with filter for customization
+		$config = apply_filters('userfeedback_exclusion_banner_config', array(
+			'title'          => __('Survey is Hidden for Administrators', 'userfeedback'),
+			'message'        => __('Surveys are hidden for administrator accounts to keep your survey results accurate. To see surveys on your site, use an incognito window or log out.', 'userfeedback')
+		), $exclusion_reason);
+
+		// Enqueue banner assets
+		$this->enqueue_banner_assets($config);
+	}
+
+	/**
+	 * Enqueue banner CSS and JS assets
+	 *
+	 * @since 1.x.x
+	 * @param array $config Banner configuration
+	 * @return void
+	 */
+	private function enqueue_banner_assets($config)
+	{
+		wp_enqueue_style(
+			'userfeedback-admin-banner',
+			plugins_url('/assets/css/admin-exclusion-banner.css', USERFEEDBACK_PLUGIN_FILE),
+			array(),
+			userfeedback_get_asset_version()
+		);
+
+		wp_enqueue_script(
+			'userfeedback-admin-banner',
+			plugins_url('/assets/js/admin-exclusion-banner.js', USERFEEDBACK_PLUGIN_FILE),
+			array(),
+			userfeedback_get_asset_version(),
+			true
+		);
+
+		// Localize banner config for JS
+		wp_localize_script(
+			'userfeedback-admin-banner',
+			'userfeedback_banner_config',
+			$config
+		);
+
+		// Add banner HTML to footer
+		add_action('wp_footer', array($this, 'render_banner_html'), 999);
+	}
+
+	/**
+	 * Render banner HTML in footer
+	 *
+	 * @since 1.x.x
+	 * @return void
+	 */
+	public function render_banner_html()
+	{
+		$logo_url = plugins_url('/assets/vue/img/user-feedback-logo.svg', USERFEEDBACK_PLUGIN_FILE);
+		?>
+		<div id="userfeedback-admin-banner" class="userfeedback-admin-banner" style="display:none;">
+			<div class="userfeedback-admin-banner__card">
+				<button class="userfeedback-admin-banner__close" type="button" aria-label="<?php esc_attr_e('Close', 'userfeedback'); ?>">
+					<svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z" fill="currentColor"/>
+					</svg>
+				</button>
+				<div class="userfeedback-admin-banner__media">
+					<div class="userfeedback-admin-banner__logo">
+						<img src="<?php echo esc_url($logo_url); ?>" alt="<?php esc_attr_e('UserFeedback', 'userfeedback'); ?>">
+					</div>
+					<div class="userfeedback-admin-banner__body">
+						<h3 class="userfeedback-admin-banner__title"></h3>
+						<p class="userfeedback-admin-banner__message"></p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<?php
 	}
 }
 

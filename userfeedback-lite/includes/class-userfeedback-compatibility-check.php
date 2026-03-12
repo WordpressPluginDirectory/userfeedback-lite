@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( ! class_exists( 'UserFeedback_Compatibility_Check' ) ) {
 	class UserFeedback_Compatibility_Check {
 
@@ -249,6 +253,7 @@ if ( ! class_exists( 'UserFeedback_Compatibility_Check' ) ) {
 				deactivate_plugins( $plugin );
 				wp_die(
 					sprintf(
+						// translators: %1$s and %3$s are strong HTML tags, %2$s is the required PHP version, %4$s is a link tag, %5$s is a closing link tag.
 						esc_html__( 'Sorry, but your version of PHP does not meet UserFeedback\'s required version of %1$s%2$s%3$s to run properly. The plugin has not been activated. %4$sClick here to return to the Dashboard%5$s.', 'userfeedback-lite' ),
 						'<strong>',
 						esc_html($compatible_php_version['required']),
@@ -263,6 +268,7 @@ if ( ! class_exists( 'UserFeedback_Compatibility_Check' ) ) {
 				deactivate_plugins( plugin_basename( __FILE__ ) );
 				wp_die(
 					sprintf(
+						// translators: %1$s and %3$s are strong HTML tags, %2$s is the required WordPress version, %4$s is a link tag, %5$s is a closing link tag.
 						esc_html__( 'Sorry, but your version of WordPress does not meet UserFeedback\'s required version of %1$s%2$s%3$s to run properly. The plugin has not been activated. %4$sClick here to return to the Dashboard%5$s.', 'userfeedback-lite' ),
 						'<strong>',
 						esc_html($compatible_wp_version['required']),

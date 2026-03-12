@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Handles all admin ajax interactions for the UserFeedback plugin.
  *
@@ -114,6 +118,7 @@ add_action( 'wp_ajax_userfeedback_vue_onboarding_complete', 'userfeedback_comple
 
 
 function userfeedback_onboarding_drop_opt_in() {
+	check_ajax_referer( 'uf-admin-nonce', 'nonce' );
 	$post_data = sanitize_post( $_POST, 'raw' );
 	// Drip register
 	$email = sanitize_email( $post_data['email'] );
@@ -157,11 +162,13 @@ add_action( 'wp_ajax_userfeedback_vue_onboarding_drip_opt_in', 'userfeedback_onb
  * @return void
  */
 function userfeedback_vue_onboarding_step() {
+	check_ajax_referer( 'uf-admin-nonce', 'nonce' );
 	if ( ! current_user_can( 'userfeedback_save_settings' ) ) {
 		return;
 	}
 	// update onboarding step
-	userfeedback_update_option('userfeedback_onboarding_step', $_POST['step']);
+	$step = isset( $_POST['step'] ) ? sanitize_text_field( wp_unslash( $_POST['step'] ) ) : '';
+	userfeedback_update_option( 'userfeedback_onboarding_step', $step );
 	wp_die();
 }
 add_action( 'wp_ajax_userfeedback_vue_onboarding_step', 'userfeedback_vue_onboarding_step' );

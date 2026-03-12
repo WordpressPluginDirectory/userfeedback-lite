@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Ask for some love.
  *
@@ -86,6 +90,7 @@ class UserFeedback_Review {
 					<?php
 					echo wp_kses(
 						sprintf(
+							// translators: %1$s is the plugin name wrapped in strong tags.
 							__( 'Hey - we noticed you\'ve been using %1$s for a while - that\'s great! Could you do us a BIG favor and give it a 5-star review on WordPress to help us spread the word and boost our motivation?', 'userfeedback-lite' ),
 							'<strong>' . USERFEEDBACK_PLUGIN_NAME . '</strong>'
 						),
@@ -94,7 +99,7 @@ class UserFeedback_Review {
 					?>
 				</p>
 				<p>
-					<a href="https://wordpress.org/support/plugin/userfeedback-lite/reviews/?filter=5#new-post"
+					<a href="https://wordpress.org/support/plugin/userfeedback-lite/reviews/#new-post"
 					   class="userfeedback-dismiss-review-notice userfeedback-review-out" target="_blank"
 					   rel="noopener noreferrer"><?php esc_html_e( 'Ok, you deserve it', 'userfeedback-lite' ); ?></a><br>
 					<a href="#" class="userfeedback-dismiss-review-notice userfeedback-review-later"
@@ -112,6 +117,7 @@ class UserFeedback_Review {
                     }
                     $.post(ajaxurl, {
                         action: 'userfeedback_review_dismiss',
+                        nonce: '<?php echo esc_js( wp_create_nonce( 'userfeedback_review_nonce' ) ); ?>',
                         review_later: $(this).hasClass('userfeedback-review-later')
                     });
                     $('.userfeedback-review-notice').remove();
@@ -127,9 +133,11 @@ class UserFeedback_Review {
 	 * @since 1.0.1
 	 */
 	public function review_dismiss() {
+		check_ajax_referer( 'userfeedback_review_nonce', 'nonce' );
+
 		$review = get_option( 'userfeedback_review', array() );
 
-		if ( isset( $_POST['review_later'] ) && "true" === $_POST['review_later'] ) {
+		if ( isset( $_POST['review_later'] ) && "true" === $_POST['review_later'] ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Compared as string equality only.
 			$review['time']      = time() + ( DAY_IN_SECONDS * 7 ); // Add 7 days.
 			$review['dismissed'] = false;
 		} else {

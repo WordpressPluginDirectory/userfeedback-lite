@@ -32,7 +32,7 @@ if (!class_exists('UserFeedbackGutenberg')) {
 				}
 			}
 
-			wp_enqueue_script( 'lodash', includes_url('js') . '/underscore.min.js' );
+			wp_enqueue_script( 'lodash', includes_url('js') . '/underscore.min.js', array(), USERFEEDBACK_VERSION, false );
 			$plugins_style_path = '/assets/gutenberg/css/editor.css';
 			$version_path       = userfeedback_is_pro_version() ? 'pro' : 'lite';
 			if ("pro" === $version_path) {
