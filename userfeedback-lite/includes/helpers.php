@@ -318,7 +318,7 @@ function userfeedback_email_survey_is_licensed()
 	if (isset($addons[$slug])) {
 		$addon = $addons[$slug];
 		if ($addon instanceof stdClass) {
-			$addon = array( $addon );
+			$addon = (array) $addon;
 		}
 
 		if (isset($addon['type']) && $addon['type'] === 'licensed') {
