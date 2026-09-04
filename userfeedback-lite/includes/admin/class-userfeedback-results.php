@@ -309,9 +309,9 @@ class UserFeedback_Results {
 						);
 						break;
 				}
-			} else {
-				$question_data['answers'] = array();
 			}
+
+			$question_data['answers'] = array();
 
 			foreach ( $responses as $response ) {
 				$question_answer_index = array_search( $id, array_column( $response->answers, 'question_id' ) );
@@ -426,15 +426,24 @@ class UserFeedback_Results {
 			return array();
 		}
 
-		$allowed_filter_attrs = array( 'status' );
-		$sanitized = array();
+		$allowed_filters = array(
+			'status' => array( 'all', 'publish', 'draft', 'trash' ),
+		);
+		$sanitized       = array();
 
 		foreach ( $filters as $key => $value ) {
-			// Only allow whitelisted column names
 			$sanitized_key = sanitize_key( $key );
-			if ( in_array( $sanitized_key, $allowed_filter_attrs, true ) ) {
-				$sanitized[ $sanitized_key ] = sanitize_text_field( $value );
+			if ( ! isset( $allowed_filters[ $sanitized_key ] ) ) {
+				continue;
 			}
+
+			$sanitized_value = strtolower( sanitize_text_field( $value ) );
+
+			if ( is_array( $allowed_filters[ $sanitized_key ] ) && ! in_array( $sanitized_value, $allowed_filters[ $sanitized_key ], true ) ) {
+				continue;
+			}
+
+			$sanitized[ $sanitized_key ] = $sanitized_value;
 		}
 
 		return $sanitized;
@@ -625,45 +634,32 @@ class UserFeedback_Results {
 
 		$survey_id = $request->get_param( 'id' );
 
+		$filters = $request->get_param( 'filter' );
+		$filters = is_array( $filters ) ? $filters : array();
+		$where   = array( 'survey_id' => $survey_id );
+
+		// Apply status filter or default to excluding trash
+		if ( isset( $filters['status'] ) && 'all' !== $filters['status'] ) {
+			$where[] = array( 'status', '=', $filters['status'] );
+		} else {
+			$where[] = array( 'status', '!=', 'trash' );
+		}
+
+		// Apply any other allowed filters generically
+		foreach ( $filters as $key => $value ) {
+			if ( 'status' === $key ) {
+				continue;
+			}
+			$where[] = array( $key, '=', $value );
+		}
+
 		// Get responses
-		$query = UserFeedback_Response::where(
-			array(
-				'survey_id' => $survey_id,
-				array( 'status', '!=', 'trash' ), // Get only published and drafts by default
-			)
-		)
+		$query = UserFeedback_Response::where( $where )
 		->sort( 'id', 'desc' )
 		->paginate(
 			$request->get_param( 'per_page' ),
 			$request->get_param( 'page' )
 		);
-
-		if ( $request->has_param( 'filter' ) ) {
-			$filters = $request->get_param( 'filter' );
-
-			// Sanitization callback should have already cleaned this
-			if ( ! is_array( $filters ) ) {
-				$filters = array();
-			}
-
-			foreach ( $filters as $attr => $value ) {
-				if ( $value === 'all' ) {
-					$query->add_where(
-						array(
-							array('status', '!=', 'trash'),
-						)
-					);
-					break;
-				}
-
-				// Only 'status' should reach here due to sanitization
-				$query->add_where(
-					array(
-						array( $attr, '=', $value ),
-					)
-				);
-			}
-		}
 
 		$responses = $query->get();
 

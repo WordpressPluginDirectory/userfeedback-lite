@@ -47,7 +47,7 @@ class UserFeedback_Logic_Type
 	 */
 	public function view_logic_type_results_permission_check()
 	{
-		return true;
+		return current_user_can( 'userfeedback_create_edit_surveys' );
 	}
 
 	/**

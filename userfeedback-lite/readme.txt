@@ -3,8 +3,8 @@ Contributors: chriscct7, smub
 Donate link: http://www.wpbeginner.com/wpbeginner-needs-your-help/
 Tags: analytics,feedback,surveys,user feedback, website feedback,heatmaps
 Requires at least: 5.9.0
-Tested Up To: 6.9
-Stable tag: 1.11.1
+Tested Up To: 7.0
+Stable tag: 1.11.4
 Requires PHP: 5.6
 License: GPL v3
 
@@ -119,6 +119,19 @@ For documentation, tutorials, FAQ and videos check out: [UserFeedback Documentat
 4. Want more features? <a href=href="https://www.userFeedback.com/?utm_source=wprepo&utm_medium=link&utm_campaign=lite" rel="friend" title="UserFeedback">Purchase UserFeedback Pro</a>!
 
 == Changelog ==
+= 1.11.4: September 3, 2026 =
+- Fixed: Deactivating the Heatmaps addon no longer causes a fatal error when UserFeedback Pro is inactive.
+- Fixed: Network-activating UserFeedback Premium no longer causes a fatal error on multisite when Lite is active on individual sites.
+- Fixed: The "Disable All UserFeedback Surveys" setting is now applied when a specific survey is selected.
+- Fixed: Improved the permission checks on the survey search and logic type endpoints.
+- Fixed: The Lite "Support" link on the Plugins screen now points to the WordPress.org support forum.
+
+= 1.11.3: July 15, 2026 =
+- Fixed: Improved plugin stability and reduced license verification requests when userfeedback.com is unreachable.
+
+= 1.11.2: May 21, 2026 =
+- Updates: Various bug fixes and improvements.
+
 = 1.11.1: March 12, 2026 =
 - Updates: Various bug fixes and improvements.
 

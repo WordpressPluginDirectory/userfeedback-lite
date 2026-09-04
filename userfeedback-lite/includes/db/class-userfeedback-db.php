@@ -271,7 +271,7 @@ abstract class UserFeedback_DB {
 		foreach ( array_keys( $params ) as $index => $key ) {
 			$set_sql .= "{$key}=%s";
 
-			if ( $index < sizeof( $params ) - 1 ) {
+			if ( $index < count( $params ) - 1 ) {
 				$set_sql .= ',';
 			}
 		}
@@ -300,7 +300,7 @@ abstract class UserFeedback_DB {
 		foreach ( $ids as $index => $id ) {
 			$sql .= "{$instance->primary_key} = %s";
 
-			if ( $index < sizeof( $ids ) - 1 ) {
+			if ( $index < count( $ids ) - 1 ) {
 				$sql .= ' OR ';
 			}
 		}
@@ -677,7 +677,7 @@ abstract class UserFeedback_DB {
 
 			$column_data    = explode( '.', $column );
 			$full_column    = $column;
-			$has_table_name = sizeof( $column_data ) > 1;
+			$has_table_name = count( $column_data ) > 1;
 
 			if ( $has_table_name ) {
 				$column = $column_data[1];
@@ -841,9 +841,7 @@ abstract class UserFeedback_DB {
 		$sql = "DROP TABLE IF EXISTS {$table_name}";
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- DDL statement; $table_name is a safe prefixed table name.
-		$wpdb->query(
-			$wpdb->prepare( $sql ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		);
+		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	// ---------------------------

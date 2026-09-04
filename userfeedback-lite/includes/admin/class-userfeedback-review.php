@@ -110,19 +110,20 @@ class UserFeedback_Review {
 			</div>
 		</div>
 		<script type="text/javascript">
-            jQuery(document).ready(function ($) {
-                $(document).on('click', '.userfeedback-dismiss-review-notice', function (event) {
-                    if (!$(this).hasClass('userfeedback-review-out')) {
-                        event.preventDefault();
-                    }
-                    $.post(ajaxurl, {
-                        action: 'userfeedback_review_dismiss',
-                        nonce: '<?php echo esc_js( wp_create_nonce( 'userfeedback_review_nonce' ) ); ?>',
-                        review_later: $(this).hasClass('userfeedback-review-later')
-                    });
-                    $('.userfeedback-review-notice').remove();
-                });
-            });
+			document.addEventListener('click', function(event) {
+				var el = event.target.closest('.userfeedback-dismiss-review-notice');
+				if (!el) return;
+				if (!el.classList.contains('userfeedback-review-out')) {
+					event.preventDefault();
+				}
+				var formData = new FormData();
+				formData.append('action', 'userfeedback_review_dismiss');
+				formData.append('nonce', '<?php echo esc_js( wp_create_nonce( 'userfeedback_review_nonce' ) ); ?>');
+				formData.append('review_later', el.classList.contains('userfeedback-review-later') ? '1' : '');
+				fetch(ajaxurl, { method: 'POST', body: formData });
+				var notice = document.querySelector('.userfeedback-review-notice');
+				if (notice) notice.remove();
+			});
 		</script>
 		<?php
 	}

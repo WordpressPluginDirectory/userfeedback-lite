@@ -24,7 +24,7 @@ if (!class_exists('UserFeedback_Base')) {
 		 * @access public
 		 * @var string $version Plugin version
 		 */
-		public $version = '1.11.1';
+		public $version = '1.11.4';
 
 		/**
 		 * Plugin file.
@@ -251,10 +251,7 @@ if (!class_exists('UserFeedback_Base')) {
 		 */
 		public function load_plugin_textdomain()
 		{
-			$uf_locale = get_locale();
-			if (function_exists('get_user_locale')) {
-				$uf_locale = get_user_locale();
-			}
+			$uf_locale = get_user_locale();
 
 			// Load Translation files
 			// Traditional WordPress plugin locale filter.
@@ -272,7 +269,7 @@ if (!class_exists('UserFeedback_Base')) {
 
 			// Look in wp-content/plugins/userfeedback/languages/userfeedback-{lang}_{country}.mo
 			$uf_mofile4 = dirname(plugin_basename(USERFEEDBACK_PLUGIN_FILE)) . '/languages/';
-			$uf_mofile4 = apply_filters('monsterinsights_pro_languages_directory', $uf_mofile4);
+			$uf_mofile4 = apply_filters('userfeedback_languages_directory', $uf_mofile4);
 
 			if (file_exists($uf_mofile1)) {
 				load_textdomain('userfeedback', $uf_mofile1);
@@ -626,7 +623,15 @@ if (!function_exists('userfeedback_maybe_redirect_to_onboarding')) {
 		delete_transient('_userfeedback_activation_redirect');
 
 		// Bail if activating from network, or bulk.
-		if (isset($_GET['activate-multi'])) { // WPCS: CSRF ok, input var ok.
+		if (is_network_admin() || isset($_GET['activate-multi'])) { // WPCS: CSRF ok, input var ok.
+			return;
+		}
+
+		// Bail if both Lite and Pro are active. `UserFeedback()` only boots the Pro
+		// instance in that case, and `get_instance()` returns before `load_settings()`
+		// runs, so `includes/helpers.php` (and the admin pages we redirect to) are
+		// never loaded.
+		if (class_exists('UserFeedback') && class_exists('UserFeedback_Lite')) {
 			return;
 		}
 

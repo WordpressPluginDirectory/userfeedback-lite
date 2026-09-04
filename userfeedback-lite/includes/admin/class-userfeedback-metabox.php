@@ -101,16 +101,8 @@ if (!class_exists('UserFeedback_Metabox')) {
 
         private function is_gutenberg_editor()
         {
-            if (function_exists('is_gutenberg_page') && is_gutenberg_page()) {
-                return true;
-            }
-
             $current_screen = get_current_screen();
-            if (method_exists($current_screen, 'is_block_editor') && $current_screen->is_block_editor()) {
-                return true;
-            }
-
-            return false;
+            return is_object($current_screen) && $current_screen->is_block_editor();
         }
 
         public function create_meta_box()
@@ -148,7 +140,7 @@ if (!class_exists('UserFeedback_Metabox')) {
             $specific_survey = get_post_meta($post->ID, '_uf_show_specific_survey', true);
             wp_nonce_field('userfeedback_metabox', 'userfeedback_metabox_nonce');
 
-            $addons = userfeedback_is_pro_version() ? userfeedback_get_parsed_addons() : [];
+            $addons = userfeedback_is_pro_version() ? ( get_option( 'userfeedback_parsed_addons' ) ?: userfeedback_get_parsed_addons() ) : [];
 
             $query = UserFeedback_Survey::where(
                 array(

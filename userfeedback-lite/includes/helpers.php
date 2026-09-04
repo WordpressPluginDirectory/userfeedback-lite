@@ -280,20 +280,15 @@ function userfeedback_heatmap_preview()
 
 function userfeedback_post_ratings_is_licensed()
 {
-	$slug = 'post-ratings';
-	$addons = userfeedback_get_addons();
-	$licensed_addons = isset($addons['licensed']) ? $addons['licensed'] : array();
-	
-	$is_post_ratings_licensed = false;
+	$slug   = 'post-ratings';
+	$cached = get_option( 'userfeedback_parsed_addons', array() );
+	$addons = ( is_array( $cached ) && ! empty( $cached ) ) ? $cached : userfeedback_get_parsed_addons();
 
-	foreach ($licensed_addons as $addon) {
-		if (isset($addon->slug) && $addon->slug === $slug) {
-			$is_post_ratings_licensed = true;
-			break;
-		}
+	if ( isset( $addons[ $slug ] ) ) {
+		$addon = (array) $addons[ $slug ];
+		return isset( $addon['type'] ) && $addon['type'] === 'licensed';
 	}
-
-	return $is_post_ratings_licensed;
+	return false;
 }
 
 function userfeedback_post_ratings_upsell()
@@ -310,8 +305,9 @@ function userfeedback_screen_is_email_survey()
 
 function userfeedback_email_survey_is_licensed()
 {
-	$slug = 'email-surveys';
-	$addons = userfeedback_get_parsed_addons();
+	$slug   = 'email-surveys';
+	$cached = get_option( 'userfeedback_parsed_addons', array() );
+	$addons = ( is_array( $cached ) && ! empty( $cached ) ) ? $cached : userfeedback_get_parsed_addons();
 
 	$is_email_survey_licensed = false;
 
@@ -418,12 +414,7 @@ function userfeedback_require_upgrader($custom_upgrader = true)
 		require_once plugin_dir_path($base->file) . 'includes/admin/licensing/plugin-upgrader.php';
 	}
 
-	// WP 5.3 changes the upgrader skin.
-	if (version_compare($wp_version, '5.3', '<')) {
-		require_once plugin_dir_path($base->file) . '/includes/admin/licensing/skin-legacy.php';
-	} else {
-		require_once plugin_dir_path($base->file) . '/includes/admin/licensing/skin.php';
-	}
+	require_once plugin_dir_path($base->file) . '/includes/admin/licensing/skin.php';
 }
 
 function userfeedback_get_screen_url($page, $path = null, $scroll_to = null)
@@ -590,7 +581,7 @@ function userfeedback_is_tracking_allowed()
 
 if (!function_exists('wp_get_jed_locale_data')) {
 	/**
-	 * Returns Jed-formatted localization data. Added for backwards-compatibility.
+	 * Returns Jed-formatted localization data. Polyfill for pre-WP 7.0.
 	 *
 	 * @param  string $domain Translation domain.
 	 *
@@ -603,7 +594,7 @@ if (!function_exists('wp_get_jed_locale_data')) {
 		$locale = array(
 			'' => array(
 				'domain' => $domain,
-				'lang'   => is_admin() && function_exists('get_user_locale') ? get_user_locale() : get_locale(),
+				'lang'   => is_admin() ? get_user_locale() : get_locale(),
 			),
 		);
 
@@ -618,6 +609,7 @@ if (!function_exists('wp_get_jed_locale_data')) {
 		return $locale;
 	}
 }
+
 
 
 
@@ -865,49 +857,43 @@ function userfeedback_get_admin_menu_tooltip() {
 		}
 	</style>
 	<script type="text/javascript">
-		if ('undefined' !== typeof jQuery) {
-			jQuery(function ($) {
-				var $tooltip = $(document.getElementById('userfeedback-admin-menu-tooltip'));
-				var $menuwrapper = $(document.getElementById('adminmenuwrap'));
-				var $menuitem = $(document.getElementById('toplevel_page_userfeedback_surveys'));
-				if (0 === $menuitem.length) {
-					$menuitem = $(document.getElementById('toplevel_page_userfeedback_network'));
-				}
-				if (0 === $menuitem.length) {
-					$menuitem = $(document.getElementById('toplevel_page_userfeedback_surveys'));
-				}
-				if (0 === $menuitem.length) {
-					return;
-				}
+		document.addEventListener('DOMContentLoaded', function() {
+			var tooltip = document.getElementById('userfeedback-admin-menu-tooltip');
+			var menuitem = document.getElementById('toplevel_page_userfeedback_surveys')
+				|| document.getElementById('toplevel_page_userfeedback_network');
 
-				if ($menuitem.length) {
-					$menuitem.append($tooltip);
-					$tooltip.removeClass('userfeedback-admin-menu-tooltip-hide');
-				}
-				$tooltip.css({
-					top: -1 * $tooltip.innerHeight() / 2 + 'px'
+			if (!tooltip || !menuitem) {
+				return;
+			}
+
+			menuitem.appendChild(tooltip);
+			tooltip.classList.remove('userfeedback-admin-menu-tooltip-hide');
+			tooltip.style.top = -1 * tooltip.offsetHeight / 2 + 'px';
+
+			function hideTooltip() {
+				tooltip.classList.add('userfeedback-admin-menu-tooltip-hide');
+				var formData = new FormData();
+				formData.append('action', 'userfeedback_hide_admin_menu_tooltip');
+				formData.append('nonce', '<?php echo esc_js( wp_create_nonce( 'mi-admin-nonce' ) ); ?>');
+				fetch(ajaxurl, { method: 'POST', body: formData });
+			}
+
+			var launchBtn = document.getElementById('userfeedback-admin-menu-launch-survery-tooltip-button');
+			if (launchBtn) {
+				launchBtn.addEventListener('click', function(e) {
+					e.preventDefault();
+					window.location = this.getAttribute('data-url');
 				});
+			}
 
-				function hideTooltip() {
-					$tooltip.addClass('userfeedback-admin-menu-tooltip-hide');
-					$.post(ajaxurl, {
-					action: 'userfeedback_hide_admin_menu_tooltip',
-					nonce: '<?php echo esc_js( wp_create_nonce( 'mi-admin-nonce' ) ); ?>',
-					});
-				}
-
-				$('#userfeedback-admin-menu-launch-survery-tooltip-button').click(function() {
-					let url = $(this).data('url');
-					window.location = url;
-					return false;
-				});
-
-				$('.userfeedback-admin-menu-tooltip-close').on('click', function(e) {
+			var closeBtns = tooltip.querySelectorAll('.userfeedback-admin-menu-tooltip-close');
+			closeBtns.forEach(function(btn) {
+				btn.addEventListener('click', function(e) {
 					e.preventDefault();
 					hideTooltip();
 				});
 			});
-		}
+		});
 	</script>
 	<?php
 }

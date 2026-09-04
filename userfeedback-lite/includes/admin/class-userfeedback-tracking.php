@@ -42,7 +42,6 @@ class UserFeedback_Tracking {
 		$theme_data = wp_get_theme();
 
 		// Specific UF data
-		$surveys_count        = UserFeedback_Survey::count();
 		$active_surveys_data  = $this->get_active_surveys_data();
 		$tracked_data         = get_option( 'userfeedback_tracking_data', array() );
 
@@ -69,10 +68,9 @@ class UserFeedback_Tracking {
 		$data['email']          = get_bloginfo( 'admin_email' );
 		$data['key']            = userfeedback_get_license_key();
 		$data['sas']            = userfeedback_get_shareasale_id();
-		$data['settings']       = $settings;
-		$data['surveys_count']         = $surveys_count;
-		$data['active_surveys_count']  = $active_surveys_data['count'];
-		$data['active_survey_names']   = $active_surveys_data['names'];
+		$data['settings']       = wp_json_encode( $settings );
+		$data['uf_active_surveys_count']  = $active_surveys_data['count'];
+		$data['uf_active_survey_names']   = wp_json_encode( $active_surveys_data['names'] );
 		$data['pro']                   = (int) userfeedback_is_pro_version();
 		$data['sites']          = $count_b;
 		$data['usagetracking']  = get_option( 'userfeedback_usage_tracking_config', false );
@@ -94,8 +92,8 @@ class UserFeedback_Tracking {
 			}
 		}
 
-		$data['active_plugins']   = $active_plugins;
-		$data['inactive_plugins'] = $plugins;
+		$data['active_plugins']   = wp_json_encode( $active_plugins );
+		$data['inactive_plugins'] = wp_json_encode( $plugins );
 		$data['locale']           = get_locale();
 
 		return $data;
@@ -207,7 +205,7 @@ class UserFeedback_Tracking {
 
 		// Send an initial check in on settings save
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Capability check above; triggered via settings form which has its own nonce.
-		$post_data      = sanitize_post( $_POST, 'raw' );
+		$post_data      = $_POST;
 		$anonymous_data = isset( $post_data['anonymous_data'] ) ? 1 : 0;
 		if ( $anonymous_data ) {
 			$this->send_checkin( true, true );

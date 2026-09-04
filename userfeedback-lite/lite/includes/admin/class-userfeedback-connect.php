@@ -17,7 +17,7 @@ class UserFeedback_Connect {
 	 */
 	public function generate_connect_url() {
 		check_ajax_referer( 'uf-admin-nonce', 'nonce' );
-		$post_data = sanitize_post( $_POST, 'raw' );
+		$post_data = $_POST;
 		// Check for permissions.
 		if ( ! userfeedback_can_install_plugins() ) {
 			wp_send_json_error( array( 'message' => esc_html__( 'You are not allowed to install plugins.', 'userfeedback-lite' ) ) );
@@ -99,7 +99,7 @@ class UserFeedback_Connect {
 	 */
 	public function process() {
 		 $error       = esc_html__( 'Could not install upgrade. Please download from userfeedback.com and install manually.', 'userfeedback-lite' );
-		$request_data = sanitize_post( $_REQUEST, 'raw' );
+		$request_data = $_REQUEST;
 		// verify params present (oth & download link).
 		$post_oth = ! empty( $request_data['oth'] ) ? sanitize_text_field( $request_data['oth'] ) : '';
 		$post_url = ! empty( $request_data['file'] ) ? esc_url_raw( $request_data['file'] ) : '';

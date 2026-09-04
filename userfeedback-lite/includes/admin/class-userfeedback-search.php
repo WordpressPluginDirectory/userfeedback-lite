@@ -43,7 +43,7 @@ class UserFeedback_Search {
 	 * @return bool
 	 */
 	public function view_search_results_permission_check() {
-		return true;
+		return current_user_can( 'userfeedback_create_edit_surveys' );
 	}
 
 	/**

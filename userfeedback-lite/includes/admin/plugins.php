@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function userfeedback_install_plugin()
 {
 	check_ajax_referer('userfeedback-install', 'nonce');
-	$post_data = sanitize_post($_POST, 'raw');
+	$post_data = $_POST;
 	if (!userfeedback_can_install_plugins()) {
 		wp_send_json(
 			array(
@@ -115,7 +115,7 @@ add_action( 'wp_ajax_userfeedback_install_plugin', 'userfeedback_install_plugin'
 
 function userfeedback_activate_plugin(){
 	check_ajax_referer( 'userfeedback-install', 'nonce' );
-	$post_data = sanitize_post( $_POST, 'raw' );
+	$post_data = $_POST;
 	if ( ! userfeedback_can_install_plugins() ) {
 		wp_send_json(
 			array(

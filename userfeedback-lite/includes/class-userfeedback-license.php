@@ -366,6 +366,30 @@ final class UserFeedback_License {
 		update_site_option( 'userfeedback_network_license_updates', strtotime( '+8 hours' ) );
 	}
 
+	/**
+	 * Advance the license check gate by a backoff window after a failed request.
+	 *
+	 * Used when a remote validation request fails (e.g. userfeedback.com is
+	 * unreachable). Without this, the failure path leaves the gate untouched and
+	 * `maybe_validate_key()` re-fires the remote request on every admin_init.
+	 *
+	 * @since 1.0.0
+	 */
+	public function set_site_license_updates_backoff() {
+		update_option( 'userfeedback_license_updates', strtotime( '+4 hours' ) );
+	}
+
+	/**
+	 * Network variant of set_site_license_updates_backoff().
+	 *
+	 * @see UserFeedback_License::set_site_license_updates_backoff()
+	 *
+	 * @since 1.0.0
+	 */
+	public function set_network_license_updates_backoff() {
+		update_site_option( 'userfeedback_network_license_updates', strtotime( '+4 hours' ) );
+	}
+
 	public function delete_site_license_updates() {
 		delete_option( 'userfeedback_license_updates' );
 	}

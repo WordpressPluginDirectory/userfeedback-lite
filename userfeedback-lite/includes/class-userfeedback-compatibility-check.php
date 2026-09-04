@@ -40,9 +40,9 @@ if ( ! class_exists( 'UserFeedback_Compatibility_Check' ) ) {
 		 * }
 		 */
 		private $compatible_php_version = array(
-			'required'    => '5.5',
-			'warning'     => '7.0',
-			'recommended' => '7.2',
+			'required'    => '7.4',
+			'warning'     => '7.4',
+			'recommended' => '8.2',
 		);
 
 		/**
@@ -56,9 +56,9 @@ if ( ! class_exists( 'UserFeedback_Compatibility_Check' ) ) {
 		 * }
 		 */
 		private $compatible_wp_version = array(
-			'required'    => '4.8',
-			'warning'     => '4.9',
-			'recommended' => false,
+			'required'    => '5.9',
+			'warning'     => '6.0',
+			'recommended' => '6.7',
 		);
 
 		/**

@@ -421,7 +421,7 @@ class UserFeedback_Email_Summaries {
 	 * @since 1.0.0
 	 */
 	public function get_summaries_start_date() {
-		return wp_date( 'Y-m-d', strtotime( '-1 day, last week', current_time( 'timestamp' ) ) ); // sunday of last week
+		return wp_date( 'Y-m-d', strtotime( '-1 day, last week', current_datetime()->getTimestamp() ) ); // sunday of last week
 	}
 
 	/**
@@ -430,7 +430,7 @@ class UserFeedback_Email_Summaries {
 	 * @since 1.0.0
 	 */
 	public function get_summaries_end_date() {
-		return wp_date( 'Y-m-d', strtotime( 'last saturday', current_time( 'timestamp' ) ) ); // last saturday
+		return wp_date( 'Y-m-d', strtotime( 'last saturday', current_datetime()->getTimestamp() ) ); // last saturday
 	}
 
 	/**

@@ -33,20 +33,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 function userfeedback_ajax_dismiss_notice() {
 	// Run a security check first.
 	check_ajax_referer( 'userfeedback-dismiss-notice', 'nonce' );
-	$post_data = sanitize_post( $_POST, 'raw' );
+	$post_data = $_POST;
 	// Deactivate the notice
 	if ( isset( $post_data['notice'] ) ) {
 		// Init the notice class and mark notice as deactivated
 		UserFeedback()->notices->dismiss( $post_data['notice'] );
 
 		// Return true
-		echo json_encode( true );
-		wp_die();
+		wp_send_json( true );
 	}
 
 	// If here, an error occurred
-	echo json_encode( false );
-	wp_die();
+	wp_send_json( false );
 }
 add_action( 'wp_ajax_userfeedback_ajax_dismiss_notice', 'userfeedback_ajax_dismiss_notice' );
 
@@ -55,20 +53,18 @@ function userfeedback_ajax_vue_remove_notice() {
 	check_ajax_referer( 'uf-admin-nonce', 'nonce' );
 
 	// Deactivate the notice
-	$post_data = sanitize_post( $_POST, 'raw' );
+	$post_data = $_POST;
 	if ( isset( $post_data['notice_id'] ) ) {
 		$key = userfeedback_get_notice_hide_opt_prefix() . $post_data['notice_id'];
 		update_option( $key, time() );
 		update_user_meta( get_current_user_id(), $key, time() );
 
 		// Return true
-		echo json_encode( true );
-		wp_die();
+		wp_send_json( true );
 	}
 
 	// If here, an error occurred
-	echo json_encode( false );
-	wp_die();
+	wp_send_json( false );
 }
 add_action( 'wp_ajax_userfeedback_ajax_vue_remove_notice', 'userfeedback_ajax_vue_remove_notice' );
 
@@ -78,7 +74,7 @@ function userfeedback_ajax_vue_remove_wp_notice() {
 	check_ajax_referer( 'uf-admin-nonce', 'nonce' );
 
 	// Deactivate the notice
-	$post_data = sanitize_post( $_POST, 'raw' );
+	$post_data = $_POST;
 	
 	if ( isset( $post_data['notice_id'] ) ) {
 		$key = userfeedback_get_wp_notice_hide_opt_prefix() . $post_data['notice_id'];
@@ -86,13 +82,11 @@ function userfeedback_ajax_vue_remove_wp_notice() {
 		update_user_meta( get_current_user_id(), $key, time() );
 
 		// Return true
-		echo json_encode( true );
-		wp_die();
+		wp_send_json( true );
 	}
 
 	// If here, an error occurred
-	echo json_encode( false );
-	wp_die();
+	wp_send_json( false );
 }
 add_action( 'wp_ajax_userfeedback_ajax_vue_remove_wp_notice', 'userfeedback_ajax_vue_remove_wp_notice' );
 
@@ -119,7 +113,7 @@ add_action( 'wp_ajax_userfeedback_vue_onboarding_complete', 'userfeedback_comple
 
 function userfeedback_onboarding_drop_opt_in() {
 	check_ajax_referer( 'uf-admin-nonce', 'nonce' );
-	$post_data = sanitize_post( $_POST, 'raw' );
+	$post_data = $_POST;
 	// Drip register
 	$email = sanitize_email( $post_data['email'] );
 
@@ -181,8 +175,7 @@ add_action( 'wp_ajax_userfeedback_vue_onboarding_step', 'userfeedback_vue_onboar
  */
 function userfeedback_validate_settings_blurb() {
 	$return = get_user_meta( get_current_user_id(), 'userfeedback-dismiss-settings-blurb', true );
-	echo json_encode($return);
-	wp_die();
+	wp_send_json( $return );
 }
 add_action( 'wp_ajax_userfeedback_validate_settings_blurb', 'userfeedback_validate_settings_blurb' );
 
@@ -193,8 +186,7 @@ add_action( 'wp_ajax_userfeedback_validate_settings_blurb', 'userfeedback_valida
  */
 function userfeedback_dismiss_settings_blurb() {
 	update_user_meta( get_current_user_id(), 'userfeedback-dismiss-settings-blurb', true );
-	echo json_encode( true );
-	wp_die();
+	wp_send_json( true );
 }
 add_action( 'wp_ajax_userfeedback_dismiss_settings_blurb', 'userfeedback_dismiss_settings_blurb' );
 

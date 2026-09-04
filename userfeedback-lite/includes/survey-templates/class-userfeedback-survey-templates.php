@@ -74,7 +74,7 @@ class UserFeedback_Survey_Templates {
 			'ecommerce',
 			array(
 				'key'         => 'ecommerce',
-				'name'        => __( 'eCommerce Store Survey (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'eCommerce Store Survey', 'userfeedback-lite' ),
 				'categories' => array(
 					'ecommerce', 'ui-ux'
 				),
@@ -93,7 +93,7 @@ class UserFeedback_Survey_Templates {
 			'b2b',
 			array(
 				'key'         => 'b2b',
-				'name'        => __( 'B2B Satisfaction Survey (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'B2B Satisfaction Survey', 'userfeedback-lite' ),
 				'description' => array(
 					'title' => __( 'See what customers think about your product or service and find ways to improve.', 'userfeedback-lite' )
 				),
@@ -109,7 +109,7 @@ class UserFeedback_Survey_Templates {
 			'nps',
 			array(
 				'key'         => 'nps',
-				'name'        => __( 'NPS Survey (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'NPS Survey', 'userfeedback-lite' ),
 				'description' => array(
 					'title' => __( 'See how likely a customer is to refer a friend or colleague.', 'userfeedback-lite' ),
 					'list' => array(
@@ -131,7 +131,7 @@ class UserFeedback_Survey_Templates {
 			'ecommerce-experience',
 			array(
 				'key'         => 'ecommerce-experience',
-				'name'        => __( 'eCommerce Store Experience (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'eCommerce Store Experience', 'userfeedback-lite' ),
 				'categories' => array(
 					'ecommerce', 'experience'
 				),
@@ -146,7 +146,7 @@ class UserFeedback_Survey_Templates {
 			'website-design',
 			array(
 				'key'         => 'website-design',
-				'name'        => __( 'Website Design Feedback (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'Website Design Feedback', 'userfeedback-lite' ),
 				'categories' => array(
 					'experience', 'ui-ux', 'engagement'
 				),
@@ -161,7 +161,7 @@ class UserFeedback_Survey_Templates {
 			'ecommerce-conversion-optimization',
 			array(
 				'key'         => 'ecommerce-conversion-optimization',
-				'name'        => __( 'eCommerce Conversion Optimization (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'eCommerce Conversion Optimization', 'userfeedback-lite' ),
 				'categories' => array(
 					'ecommerce', 'experience', 'ui-ux'
 				),
@@ -176,7 +176,7 @@ class UserFeedback_Survey_Templates {
 			'nps-product-feedback',
 			array(
 				'key'         => 'nps-product-feedback',
-				'name'        => __( 'NPS (R) Product Feedback (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'NPS (R) Product Feedback', 'userfeedback-lite' ),
 				'categories' => array(
 					'experience'
 				),
@@ -194,7 +194,7 @@ class UserFeedback_Survey_Templates {
 			'b2b-buyer-survey',
 			array(
 				'key'         => 'b2b-buyer-survey',
-				'name'        => __( 'B2B Buyer Persona Survey (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'B2B Buyer Persona Survey', 'userfeedback-lite' ),
 				'categories' => array(
 					'ui-ux'
 				),
@@ -209,7 +209,7 @@ class UserFeedback_Survey_Templates {
 			'post-purchase',
 			array(
 				'key'         => 'post-purchase',
-				'name'        => __( 'Post Purchase Review (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'Post Purchase Review', 'userfeedback-lite' ),
 				'categories' => array(
 					'ecommerce'
 				),
@@ -224,7 +224,7 @@ class UserFeedback_Survey_Templates {
 			'product-usage',
 			array(
 				'key'         => 'product-usage',
-				'name'        => __( 'Product Usage Survey (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'Product Usage Survey', 'userfeedback-lite' ),
 				'categories' => array(
 					'ecommerce', 'ui-ux'
 				),
@@ -245,7 +245,7 @@ class UserFeedback_Survey_Templates {
 			'pricing-page-info',
 			array(
 				'key'         => 'pricing-page-info',
-				'name'        => __( 'Pricing Page Information (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'Pricing Page Information', 'userfeedback-lite' ),
 				'categories' => array(
 					'ecommerce', 'ui-ux'
 				),
@@ -260,7 +260,7 @@ class UserFeedback_Survey_Templates {
 			'buyer-journey',
 			array(
 				'key'         => 'buyer-journey',
-				'name'        => __( 'Buyer Journey Research (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'Buyer Journey Research', 'userfeedback-lite' ),
 				'categories' => array(
 					'ecommerce', 'ui-ux'
 				),
@@ -275,7 +275,7 @@ class UserFeedback_Survey_Templates {
 			'beta-opt-in',
 			array(
 				'key'         => 'beta-opt-in',
-				'name'        => __( 'User Beta Testing Opt-in (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'User Beta Testing Opt-in', 'userfeedback-lite' ),
 				'description' => array(
 					'title' => __( 'Easily find users for your latest feature or beta testing period.', 'userfeedback-lite' )
 				),
@@ -290,7 +290,7 @@ class UserFeedback_Survey_Templates {
 			'product-offering',
 			array(
 				'key'         => 'product-offering',
-				'name'        => __( 'Product Offering Intelligence (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'Product Offering Intelligence', 'userfeedback-lite' ),
 				'description' => array(
 					'title' => __( "Find out why someone didn't purchase from you, and collect their email address.", 'userfeedback-lite' )
 				),
@@ -305,7 +305,7 @@ class UserFeedback_Survey_Templates {
 			'feature-research',
 			array(
 				'key'         => 'feature-research',
-				'name'        => __( 'Website Feature Research (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'Website Feature Research', 'userfeedback-lite' ),
 				'categories' => array(
 					'ecommerce', 'engagement'
 				),
@@ -326,7 +326,7 @@ class UserFeedback_Survey_Templates {
 			'competitive-research',
 			array(
 				'key'         => 'competitive-research',
-				'name'        => __( 'Competitive Research (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'Competitive Research', 'userfeedback-lite' ),
 				'categories' => array(
 					'experience', 'ui-ux', 'engagement'
 				),
@@ -341,7 +341,7 @@ class UserFeedback_Survey_Templates {
 			'content-research',
 			array(
 				'key'         => 'content-research',
-				'name'        => __( 'Content Research (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'Content Research', 'userfeedback-lite' ),
 				'categories' => array(
 					'ui-ux', 'engagement'
 				),
@@ -362,7 +362,7 @@ class UserFeedback_Survey_Templates {
 			'product-research',
 			array(
 				'key'         => 'product-research',
-				'name'        => __( 'Product Research (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'Product Research', 'userfeedback-lite' ),
 				'categories' => array(
 					'ui-ux', 'engagement'
 				),
@@ -377,7 +377,7 @@ class UserFeedback_Survey_Templates {
 			'saas-feedback',
 			array(
 				'key'         => 'saas-feedback',
-				'name'        => __( 'SAAS Feature Feedback (PRO)', 'userfeedback-lite' ),
+				'name'        => __( 'SAAS Feature Feedback', 'userfeedback-lite' ),
 				'categories' => array(
 					'ui-ux', 'engagement'
 				),

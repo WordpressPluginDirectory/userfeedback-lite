@@ -330,7 +330,7 @@ function userfeedback_add_action_links( $links ) {
 		$support = '<a title="UserFeedback Pro Support" target="_blank" rel="noopener" href="' . userfeedback_get_url( 'all-plugins', 'pro-support-link', 'https://www.userfeedback.com/my-account/support/' ) . '">' . esc_html__( 'Support', 'userfeedback-lite' ) . '</a>';
 		array_unshift( $links, $support );
 	} else {
-		$support = '<a title="UserFeedback Lite Support" target="_blank" rel="noopener" href="' . userfeedback_get_url( 'all-plugins', 'lite-support-link', 'https://www.userfeedback.com/lite-support/' ) . '">' . esc_html__( 'Support', 'userfeedback-lite' ) . '</a>';
+		$support = '<a title="UserFeedback Lite Support" target="_blank" rel="noopener" href="' . esc_url( 'https://wordpress.org/support/plugin/userfeedback-lite/' ) . '">' . esc_html__( 'Support', 'userfeedback-lite' ) . '</a>';
 		array_unshift( $links, $support );
 	}
 

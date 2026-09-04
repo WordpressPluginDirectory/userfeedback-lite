@@ -1001,7 +1001,7 @@ class UserFeedback_Frontend
 					'widget_settings' => userfeedback_get_frontend_widget_settings(),
 					'is_preview'      => false,
 					'integrations'    => array(),
-					'addons'          => get_option('userfeedback_parsed_addons'),
+					'addons'          => get_option('userfeedback_parsed_addons') ?: array(),
 					'current_page'    => array(
 						'id'   => $post->ID,
 						'name' => $post->post_title,
